@@ -1,11 +1,7 @@
 project(ITKIOOpenSlide)
 set(ITKIOOpenSlide_LIBRARIES ITKIOOpenSlide)
 
-option( USE_OPENSLIDE "Build openslide.org file reader.  Requires the library to
-be installed." OFF )
-mark_as_advanced( USE_OPENSLIDE )
+set( CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH} )
+find_package( OpenSlide REQUIRED )
 
-if( USE_OPENSLIDE )
-  find_package( OpenSlide REQUIRED )
-  itk_module_impl()
-endif()
+itk_module_impl()

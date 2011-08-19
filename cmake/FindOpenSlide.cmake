@@ -13,6 +13,7 @@ mark_as_advanced( OPENSLIDE_INCLUDE_DIR )
 
 # Look for the library.
 find_library( OPENSLIDE_LIBRARY NAMES openslide )
+mark_as_advanced( OPENSLIDE_LIBRARY )
 
 # Handle the QUIETLY and REQUIRED arguments and set OPENSLIDE_FOUND true if all
 # the listed variables are TRUE.
