@@ -10,3 +10,5 @@ To use this module, clone it into the Modules/External directory in the ITK
 source tree.
 
 Note that the OpenSlide library (http://openslide.org) must be available.
+
+*Note:*  This module is currently a work in progress.
