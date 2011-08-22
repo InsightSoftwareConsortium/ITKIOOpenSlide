@@ -1,5 +1,5 @@
 =====================
-itk-openslide-imageio
+ITKOpenSlideIO
 =====================
 
 This is an InsightToolkit (ITK) ExternalModule to provide an ImageIO for the
