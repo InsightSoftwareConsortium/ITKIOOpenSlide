@@ -18,11 +18,12 @@
 #ifndef __itkOpenSlideImageIO_h
 #define __itkOpenSlideImageIO_h
 
-#include <fstream>
 #include "itkImageIOBase.h"
 
 namespace itk
 {
+
+class OpenSlideWrapper;
 
 /** \class OpenSlideImageIO
  *
@@ -46,6 +47,7 @@ public:
   typedef OpenSlideImageIO   Self;
   typedef ImageIOBase        Superclass;
   typedef SmartPointer<Self> Pointer;
+  typedef std::vector<std::string> AssociatedImageNameContainer;
 
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
@@ -60,6 +62,12 @@ public:
   /** Determine the file type. Returns true if this ImageIO can read the
    * file specified. */
   virtual bool CanReadFile(const char*);
+
+  /** Determine if the ImageIO can stream reading from the
+      current settings. Default is false. If this is queried after
+      the header of the file has been read then it will indicate if
+      that file can be streamed */
+  virtual bool CanStreamRead();
 
   /** Set the spacing and dimension information for the set filename. */
   virtual void ReadImageInformation();
@@ -87,6 +95,13 @@ public:
   virtual ImageIORegion
   GenerateStreamableReadRegionFromRequestedRegion( const ImageIORegion & requested ) const;
 
+  virtual void SetLevel(int iLevel);
+  virtual int GetLevel() const;
+  virtual void SetAssociatedImageName(const std::string &strName);
+  virtual std::string GetAssociatedImageName() const;
+
+  virtual bool SetLevelForDownsampleFactor(double dDownsampleFactor);
+  virtual AssociatedImageNameContainer GetAssociatedImageNames() const;
 
 protected:
   OpenSlideImageIO();
@@ -97,7 +112,7 @@ private:
   OpenSlideImageIO(const Self&); //purposely not implemented
   void operator=(const Self&); //purposely not implemented
 
-  std::ifstream     m_InputStream;
+  OpenSlideWrapper *m_p_clOpenSlideWrapper;
 };
 
 } // end namespace itk
