@@ -150,7 +150,7 @@ public:
     return openslide_get_error(m_p_osr);
   }
 
-  // Computes the spacing depending
+  // Computes the spacing depending on selected level
   // Default spacing is relative to 1 MPP if the function fails to detect spacing information (downsample factor is considered)
   bool GetSpacing(double &dSpacingX, double &dSpacingY) const {
     dSpacingX = dSpacingY = 1.0;
