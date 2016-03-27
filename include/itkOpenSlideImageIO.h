@@ -23,6 +23,7 @@
 namespace itk
 {
 
+// Forward declare a wrapper class that is responsible for openslide_t (among other things)
 class OpenSlideWrapper;
 
 /** \class OpenSlideImageIO
@@ -95,12 +96,31 @@ public:
   virtual ImageIORegion
   GenerateStreamableReadRegionFromRequestedRegion( const ImageIORegion & requested ) const;
 
+/** Detect the vendor of the current file. */
+  virtual std::string GetVendor() const;
+
+/** Sets the level to read. Level 0 (default) is the highest resolution level.
+ * This method overrides any previously selected associated image. 
+ * Call ReadImageInformation() again after calling this function. */
   virtual void SetLevel(int iLevel);
+
+/** Returns the currently selected level. */
   virtual int GetLevel() const;
+
+/** Sets the associated image to extract.
+ * This method overrides any previously selected level.
+ * Call ReadImageInformation() again after calling this function. */
   virtual void SetAssociatedImageName(const std::string &strName);
+
+/** Returns the currently selected associated image name (empty string if none). */
   virtual std::string GetAssociatedImageName() const;
 
+/** Sets the best level to read for the given downsample factor.
+ * This method overrides any previously selected associated image. 
+ * Call ReadImageInformation() again after calling this function. */
   virtual bool SetLevelForDownsampleFactor(double dDownsampleFactor);
+
+/** Returns all associated image names stored int he file. */
   virtual AssociatedImageNameContainer GetAssociatedImageNames() const;
 
 protected:
@@ -112,7 +132,7 @@ private:
   OpenSlideImageIO(const Self&); //purposely not implemented
   void operator=(const Self&); //purposely not implemented
 
-  OpenSlideWrapper *m_p_clOpenSlideWrapper;
+  OpenSlideWrapper *m_p_clOpenSlideWrapper; // Opaque pointer to a wrapper that manages openslide_t
 };
 
 } // end namespace itk

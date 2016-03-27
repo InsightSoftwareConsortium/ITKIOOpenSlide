@@ -32,93 +32,144 @@
 namespace itk
 {
 
+// OpenSlide wrapper class
+// This is responsible for freeing the OpenSlide context on destruction
+// It also allows for seamless access to various levels and associated images through one set of functions (as opposed to two)
 class OpenSlideWrapper {
 public:
-  openslide_t *p_osr;
-  int32_t i32Level;
-  std::string strAssociatedImage;
-
-  static bool CanReadFile(const char *p_cFileName) {
-    return openslide_detect_vendor(p_cFileName) != NULL;
+  // Detects the vendor. Should return NULL if the file is not readable.
+  static const char * DetectVendor(const char *p_cFileName) {
+    return openslide_detect_vendor(p_cFileName);
   }
 
+  // Weak check if the file can be read
+  static bool CanReadFile(const char *p_cFileName) {
+    return DetectVendor(p_cFileName) != NULL;
+  }
+
+  // Constructors
   OpenSlideWrapper() {
-    p_osr = NULL;
-    i32Level = 0;
+    m_p_osr = NULL;
+    m_i32Level = 0;
   }
 
   OpenSlideWrapper(const char *p_cFileName) {
-    p_osr = NULL;
-    i32Level = 0;
+    m_p_osr = NULL;
+    m_i32Level = 0;
     Open(p_cFileName);
   }
 
+  // Destructor
   ~OpenSlideWrapper() {
     Close();
   }
 
+  // Tells the ImageIO if the wrapper is in a state where stream reading can occur.
+  // While OpenSlide supports reading regions of level images, it does not for associated images.
   bool CanStreamRead() const {
-    return strAssociatedImage.empty();
+    return m_strAssociatedImage.empty();
   }
 
+  // Closes the currently opened file
   void Close() {
-    if (p_osr != NULL) {
-      openslide_close(p_osr);
-      p_osr = NULL;
+    if (m_p_osr != NULL) {
+      openslide_close(m_p_osr);
+      m_p_osr = NULL;
     }
   }
 
+  // Checks weather a slide file is currently opened
   bool IsOpened() const {
-    return p_osr != NULL;
+    return m_p_osr != NULL;
   }
 
+  // Opens a slide file
   bool Open(const char *p_cFileName) {
     Close();
-    p_osr = openslide_open(p_cFileName);
-    return p_osr != NULL;
+    m_p_osr = openslide_open(p_cFileName);
+    return m_p_osr != NULL;
   }
 
-  int32_t GetBestLevelForDownsample(double dDownsample) const {
-    if (p_osr == NULL)
-      return -1;
-
-    return openslide_get_best_level_for_downsample(p_osr, dDownsample);
+  // Sets the level that is accessible with ReadRegion, GetDimensions, GetSpacing.
+  // Clears any associated image context.
+  void SetLevel(int32_t i32Level) {
+    m_i32Level = i32Level;
+    m_strAssociatedImage.clear();
   }
 
+  // Returns the currently selected level
+  int32_t GetLevel() const {
+    return m_i32Level;
+  }
+
+  // Sets the associated image that is accessible with ReadRegion, GetDimensions
+  void SetAssociatedImageName(const std::string &strImageName) {
+    m_strAssociatedImage = strImageName;
+    m_i32Level = 0;
+  }
+
+  // Returns the currently selected associated image
+  const std::string & GetAssociatedImageName() const {
+    return m_strAssociatedImage;
+  }
+
+  // Given a downsample factor, uses OpenSlide to determine the best level to use.
+  bool SetBestLevelForDownsample(double dDownsample) {
+    if (m_p_osr == NULL)
+      return false;
+
+    const int32_t i32Level = openslide_get_best_level_for_downsample(m_p_osr, dDownsample);
+
+    if (i32Level < 0)
+      return false;
+
+    SetLevel(i32Level);
+
+    return true;
+  }
+
+  // Returns the number of levels in this file
   int32_t GetLevelCount() const {
-    if (p_osr == NULL)
+    if (m_p_osr == NULL)
       return -1;
 
-    return openslide_get_level_count(p_osr);
+    return openslide_get_level_count(m_p_osr);
   }
 
   // Returns NULL for success
+  // NOTE: When reading associated images, x, y, width and height are ignored.
   const char * ReadRegion(uint32_t *p_ui32Dest, int64_t i64X, int64_t i64Y, int64_t i64Width, int64_t i64Height) const {
-    if (p_osr == NULL)
+    if (m_p_osr == NULL)
       return "OpenSlideWrapper has no file open.";
 
-    if (strAssociatedImage.size() > 0)
-      openslide_read_associated_image(p_osr, strAssociatedImage.c_str(), p_ui32Dest);
+    if (m_strAssociatedImage.size() > 0)
+      openslide_read_associated_image(m_p_osr, m_strAssociatedImage.c_str(), p_ui32Dest);
     else
-      openslide_read_region(p_osr, p_ui32Dest, i64X, i64Y, i32Level, i64Width, i64Height);
+      openslide_read_region(m_p_osr, p_ui32Dest, i64X, i64Y, m_i32Level, i64Width, i64Height);
 
-    return openslide_get_error(p_osr);
+    return openslide_get_error(m_p_osr);
   }
 
+  // Computes the spacing depending
+  // Default spacing is relative to 1 MPP if the function fails to detect spacing information (downsample factor is considered)
   bool GetSpacing(double &dSpacingX, double &dSpacingY) const {
-    if (p_osr == NULL)
+    dSpacingX = dSpacingY = 1.0;
+
+    if (m_p_osr == NULL)
       return false;
 
-    if (strAssociatedImage.size() > 0)
+    if (m_strAssociatedImage.size() > 0)
       return false;
 
-    const double dDownsample = openslide_get_level_downsample(p_osr, i32Level);
+    const double dDownsample = openslide_get_level_downsample(m_p_osr, m_i32Level);
 
     if (dDownsample <= 0.0)
       return false;
 
-    if (!GetPropertyValue(OPENSLIDE_PROPERTY_NAME_MPP_X, dSpacingX) || !GetPropertyValue(OPENSLIDE_PROPERTY_NAME_MPP_Y, dSpacingY))
+    if (!GetPropertyValue(OPENSLIDE_PROPERTY_NAME_MPP_X, dSpacingX) || !GetPropertyValue(OPENSLIDE_PROPERTY_NAME_MPP_Y, dSpacingY)) {
+      dSpacingX = dSpacingY = dDownsample;
       return false;
+    }
 
     dSpacingX *= dDownsample;
     dSpacingY *= dDownsample;
@@ -126,33 +177,45 @@ public:
     return true;
   }
 
+  // Returns the origin of the information. Origin is (0,0) if the function fails.
   bool GetOrigin(double &dOriginX, double &dOriginY) const {
-    if (p_osr == NULL)
+    dOriginX = dOriginY = 0.0;
+
+    if (m_p_osr == NULL)
       return false;
 
-    if (strAssociatedImage.size() > 0)
+    if (m_strAssociatedImage.size() > 0)
       return false;
 
-    return GetPropertyValue(OPENSLIDE_PROPERTY_NAME_BOUNDS_X, dOriginX) && GetPropertyValue(OPENSLIDE_PROPERTY_NAME_BOUNDS_Y, dOriginY);
+    if (!GetPropertyValue(OPENSLIDE_PROPERTY_NAME_BOUNDS_X, dOriginX) || !GetPropertyValue(OPENSLIDE_PROPERTY_NAME_BOUNDS_Y, dOriginY)) {
+      dOriginX = dOriginY = 0.0;
+      return false;
+    }
+
+    return true;
   }
 
+  // Returns the dimension of the level and/or associated image
   bool GetDimensions(int64_t &i64Width, int64_t &i64Height) const {
-    if (p_osr == NULL)
+    if (m_p_osr == NULL)
       return false;
 
-    if (strAssociatedImage.size() > 0)
-      openslide_get_associated_image_dimensions(p_osr, strAssociatedImage.c_str(), &i64Width, &i64Height);
+    i64Width = i64Height = 0;
+
+    if (m_strAssociatedImage.size() > 0)
+      openslide_get_associated_image_dimensions(m_p_osr, m_strAssociatedImage.c_str(), &i64Width, &i64Height);
     else
-      openslide_get_level_dimensions(p_osr, i32Level, &i64Width, &i64Height);
+      openslide_get_level_dimensions(m_p_osr, m_i32Level, &i64Width, &i64Height);
 
     return i64Width > 0 && i64Height > 0;
   }
 
+  // Retrieves associated image names from the open slide and places them into a std::vector
   std::vector<std::string> GetAssociatedImageNames() const {
-    if (p_osr == NULL)
+    if (m_p_osr == NULL)
       return std::vector<std::string>();
 
-    const char * const * p_cNames = openslide_get_associated_image_names(p_osr);
+    const char * const * p_cNames = openslide_get_associated_image_names(m_p_osr);
 
     if (p_cNames == NULL)
       return std::vector<std::string>();
@@ -165,13 +228,14 @@ public:
     return vNames;
   }
 
+  // Forms an ITK MetaDataDictionary
   MetaDataDictionary GetMetaDataDictionary() const {
-    if (p_osr == NULL)
+    if (m_p_osr == NULL)
       return MetaDataDictionary();
 
     MetaDataDictionary clTags;
 
-    const char * const * p_cNames = openslide_get_property_names(p_osr);
+    const char * const * p_cNames = openslide_get_property_names(m_p_osr);
 
     if (p_cNames != NULL) {
       std::string strValue;
@@ -187,12 +251,13 @@ public:
     return clTags;
   }
 
+  // Templated functions for accessing and casting property values
   template<typename ValueType>
   bool GetPropertyValue(const char *p_cKey, ValueType &value) const {
-    if (p_osr == NULL)
+    if (m_p_osr == NULL)
       return false;
 
-    const char * const p_cValue = openslide_get_property_value(p_osr, p_cKey);
+    const char * const p_cValue = openslide_get_property_value(m_p_osr, p_cKey);
     if (p_cValue == NULL)
       return false;
 
@@ -206,16 +271,21 @@ public:
 
   template<>
   bool GetPropertyValue(const char *p_cKey, std::string &strValue) const {
-    if (p_osr == NULL)
+    if (m_p_osr == NULL)
       return false;
 
-    const char * const p_cValue = openslide_get_property_value(p_osr, p_cKey);
+    const char * const p_cValue = openslide_get_property_value(m_p_osr, p_cKey);
     if (p_cValue == NULL)
       return false;
 
     strValue = p_cValue;
     return true;
   }
+
+private:
+  openslide_t *m_p_osr;
+  int32_t m_i32Level;
+  std::string m_strAssociatedImage;
 };
 
 OpenSlideImageIO::OpenSlideImageIO()
@@ -260,8 +330,8 @@ OpenSlideImageIO::~OpenSlideImageIO()
 void OpenSlideImageIO::PrintSelf(std::ostream& os, Indent indent) const {
   Superclass::PrintSelf(os, indent);
   if (m_p_clOpenSlideWrapper != NULL) {
-    os << indent << "Level: " << m_p_clOpenSlideWrapper->i32Level << '\n';
-    os << indent << "Associated Image: " << m_p_clOpenSlideWrapper->strAssociatedImage << '\n';
+    os << indent << "Level: " << m_p_clOpenSlideWrapper->GetLevel() << '\n';
+    os << indent << "Associated Image: " << m_p_clOpenSlideWrapper->GetAssociatedImageName() << '\n';
   }
 }
 
@@ -296,8 +366,8 @@ void OpenSlideImageIO::ReadImageInformation() {
   m_Dimensions[0] = 0;
   m_Dimensions[1] = 0;
 
-  m_Spacing[0] = 1.0;  // We'll look for JPEG pixel size information later,
-  m_Spacing[1] = 1.0;  // but set the defaults now
+  m_Spacing[0] = 1.0;
+  m_Spacing[1] = 1.0;
 
   m_Origin[0] = 0.0;
   m_Origin[1] = 0.0;
@@ -317,23 +387,10 @@ void OpenSlideImageIO::ReadImageInformation() {
                        << itksys::SystemTools::GetLastSystemError() );
   }
 
-  {
-    double a_dSpacing[2] = { 1.0, 1.0 };
 
-    if (m_p_clOpenSlideWrapper->GetSpacing(a_dSpacing[0], a_dSpacing[1])) {
-      m_Spacing[0] = a_dSpacing[0];
-      m_Spacing[1] = a_dSpacing[1];
-    }
-  }
-
-  {
-    double a_dOrigin[2] = { 0.0, 0.0 };
-
-    if (m_p_clOpenSlideWrapper->GetOrigin(a_dOrigin[0], a_dOrigin[1])) {
-      m_Origin[0] = a_dOrigin[0]; 
-      m_Origin[1] = a_dOrigin[1];
-    }
-  }
+  // These functions will fill in default values as needed (in case they fail)
+  m_p_clOpenSlideWrapper->GetSpacing(m_Spacing[0], m_Spacing[1]);
+  m_p_clOpenSlideWrapper->GetOrigin(m_Origin[0], m_Origin[1]);
 
   {
     int64_t i64Width = 0, i64Height = 0;
@@ -386,7 +443,7 @@ void OpenSlideImageIO::Read( void * buffer)
   const char *p_cError = m_p_clOpenSlideWrapper->ReadRegion(p_u32Buffer, clStart[0], clStart[1], clSize[0], clSize[1]);
 
   if (p_cError != NULL) {
-    std::string strError = p_cError;
+    std::string strError = p_cError; // Copy this since Close() may destroy the backing buffer
     m_p_clOpenSlideWrapper->Close(); // Can only safely close this now
     itkExceptionMacro( "Error OpenSlideImageIO could not read region: "
                        << this->GetFileName()
@@ -394,7 +451,7 @@ void OpenSlideImageIO::Read( void * buffer)
                        << "Reason: " << strError );
   }
 
-  // Re-order the bytes
+  // Re-order the bytes (ARGB -> RGBA)
   const int64_t i64TotalSize = clRegionToRead.GetNumberOfPixels();
   for (int64_t i = 0; i < i64TotalSize; ++i) {
     // XXX: Endianness?
@@ -436,39 +493,50 @@ OpenSlideImageIO::GenerateStreamableReadRegionFromRequestedRegion( const ImageIO
   return requested;
 }
 
+std::string OpenSlideImageIO::GetVendor() const {
+  const char * const p_cVendor = OpenSlideWrapper::DetectVendor(this->GetFileName());
+  return p_cVendor != NULL ? std::string(p_cVendor) : std::string();
+}
+
 void OpenSlideImageIO::SetLevel(int iLevel) {
-  m_p_clOpenSlideWrapper->i32Level = iLevel;
-  m_p_clOpenSlideWrapper->strAssociatedImage.clear();
+  if (m_p_clOpenSlideWrapper == NULL)
+    return;
+
+  m_p_clOpenSlideWrapper->SetLevel(iLevel);
 }
 
 int OpenSlideImageIO::GetLevel() const {
-  return m_p_clOpenSlideWrapper->i32Level;
+  if (m_p_clOpenSlideWrapper == NULL)
+    return -1;
+
+  return m_p_clOpenSlideWrapper->GetLevel();
 }
 
 void OpenSlideImageIO::SetAssociatedImageName(const std::string &strName) {
-  m_p_clOpenSlideWrapper->strAssociatedImage = strName;
-  m_p_clOpenSlideWrapper->i32Level = 0;
+  if (m_p_clOpenSlideWrapper == NULL)
+    return;
+
+  m_p_clOpenSlideWrapper->SetAssociatedImageName(strName);
 }
 
 std::string OpenSlideImageIO::GetAssociatedImageName() const {
-  return m_p_clOpenSlideWrapper->strAssociatedImage;
+  if (m_p_clOpenSlideWrapper == NULL)
+    return std::string();
+
+  return m_p_clOpenSlideWrapper->GetAssociatedImageName();
 }
 
 bool OpenSlideImageIO::SetLevelForDownsampleFactor(double dDownsampleFactor) {
   if (m_p_clOpenSlideWrapper == NULL)
     return false;
 
-  const int iLevel = m_p_clOpenSlideWrapper->GetBestLevelForDownsample(dDownsampleFactor);
-
-  if (iLevel < 0)
-    return false;
-
-  SetLevel(iLevel);
-
-  return true;
+  return m_p_clOpenSlideWrapper->SetBestLevelForDownsample(dDownsampleFactor);
 }
 
 OpenSlideImageIO::AssociatedImageNameContainer OpenSlideImageIO::GetAssociatedImageNames() const {
+  if (m_p_clOpenSlideWrapper == NULL)
+    return AssociatedImageNameContainer();
+
   return m_p_clOpenSlideWrapper->GetAssociatedImageNames();
 }
 
