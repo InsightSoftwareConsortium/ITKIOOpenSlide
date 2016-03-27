@@ -32,9 +32,13 @@ class OpenSlideWrapper;
  * images (also known as virtual slides).  The following formats can be read:
  *
  * - Trestle (.tif),
- * - Hamamatsu (.vms, .vmu)
+ * - Hamamatsu (.vms, .vmu, .ndpi)
  * - Aperio (.svs, .tif)
  * - MIRAX (.mrxs)
+ * - Leica (.scn)
+ * - Sakura (.svslide)
+ * - Ventana (.bif, .tif)
+ * - Philips (.tiff)
  * - Generic tiled TIFF (.tif)
  *
  *  \ingroup IOFilters
