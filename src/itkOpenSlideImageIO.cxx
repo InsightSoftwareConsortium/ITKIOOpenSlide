@@ -47,6 +47,11 @@ public:
     return DetectVendor(p_cFileName) != NULL;
   }
 
+  // Returns version of OpenSlide library
+  static const char * GetVersion() {
+    return openslide_get_version();
+  }
+
   // Constructors
   OpenSlideWrapper() {
     m_p_osr = NULL;
@@ -88,6 +93,14 @@ public:
     Close();
     m_p_osr = openslide_open(p_cFileName);
     return m_p_osr != NULL;
+  }
+
+  // Get error string, NULL if there is no error
+  const char * GetError() const {
+    if (m_p_osr == NULL)
+      return "OpenSlideWrapper has no file open.";
+
+    return openslide_get_error(m_p_osr);
   }
 
   // Sets the level that is accessible with ReadRegion, GetDimensions, GetSpacing.
@@ -177,7 +190,7 @@ public:
     return true;
   }
 
-  // Returns the origin of the information. Origin is (0,0) if the function fails.
+  // Returns the origin of the selected level image. Origin is (0,0) if the function fails.
   bool GetOrigin(double &dOriginX, double &dOriginY) const {
     dOriginX = dOriginY = 0.0;
 
@@ -195,12 +208,12 @@ public:
     return true;
   }
 
-  // Returns the dimension of the level and/or associated image
+  // Returns the dimension of the level or associated image
   bool GetDimensions(int64_t &i64Width, int64_t &i64Height) const {
+    i64Width = i64Height = 0;
+
     if (m_p_osr == NULL)
       return false;
-
-    i64Width = i64Height = 0;
 
     if (m_strAssociatedImage.size() > 0)
       openslide_get_associated_image_dimensions(m_p_osr, m_strAssociatedImage.c_str(), &i64Width, &i64Height);
@@ -308,15 +321,24 @@ OpenSlideImageIO::OpenSlideImageIO()
   m_Dimensions[0] = 0;
   m_Dimensions[1] = 0;
 
-  // Trestle, Aperio, and generic tiled tiff
+  // Trestle, Aperio, Ventana, and generic tiled tiff
   this->AddSupportedReadExtension(".tif");
   // Hamamatsu
   this->AddSupportedReadExtension(".vms");
   this->AddSupportedReadExtension(".vmu");
+  this->AddSupportedReadExtension(".ndpi");
   // Aperio
   this->AddSupportedReadExtension(".svs");
   // MIRAX
   this->AddSupportedReadExtension(".mrxs");
+  // Leica
+  this->AddSupportedReadExtension(".scn");
+  // Philips
+  this->AddSupportedReadExtension(".tiff");
+  // Ventana
+  this->AddSupportedReadExtension(".bif");
+  // Sakura
+  this->AddSupportedReadExtension(".svslide");
 }
 
 OpenSlideImageIO::~OpenSlideImageIO()
@@ -329,10 +351,8 @@ OpenSlideImageIO::~OpenSlideImageIO()
 
 void OpenSlideImageIO::PrintSelf(std::ostream& os, Indent indent) const {
   Superclass::PrintSelf(os, indent);
-  if (m_p_clOpenSlideWrapper != NULL) {
-    os << indent << "Level: " << m_p_clOpenSlideWrapper->GetLevel() << '\n';
-    os << indent << "Associated Image: " << m_p_clOpenSlideWrapper->GetAssociatedImageName() << '\n';
-  }
+  os << indent << "Level: " << GetLevel() << '\n';
+  os << indent << "Associated Image: " << GetAssociatedImageName() << '\n';
 }
 
 bool OpenSlideImageIO::CanReadFile( const char* filename ) {
@@ -385,6 +405,7 @@ void OpenSlideImageIO::ReadImageInformation() {
                        << std::endl
                        << "Reason: "
                        << itksys::SystemTools::GetLastSystemError() );
+    // NOTE: OpenSlide needs to be opened to query API for errors. This is assumed to be related to a system error.
   }
 
 
@@ -395,10 +416,18 @@ void OpenSlideImageIO::ReadImageInformation() {
   {
     int64_t i64Width = 0, i64Height = 0;
     if (!m_p_clOpenSlideWrapper->GetDimensions(i64Width, i64Height)) {
+      std::string strError = "Unknown";
+      const char * const p_cError = m_p_clOpenSlideWrapper->GetError();
+
+      if (p_cError != NULL) {
+        strError = p_cError;
+        m_p_clOpenSlideWrapper->Close(); // Can only safely close this now
+      }
+
       itkExceptionMacro( "Error OpenSlideImageIO could not read dimensions: "
                          << this->GetFileName()
                          << std::endl
-                         << "Reason: Unknown." );
+                         << "Reason: " << strError );
     }
 
     if (i64Width > std::numeric_limits<itk::SizeValueType>::max() || i64Height > std::numeric_limits<itk::SizeValueType>::max()) {
@@ -493,11 +522,21 @@ OpenSlideImageIO::GenerateStreamableReadRegionFromRequestedRegion( const ImageIO
   return requested;
 }
 
+/** Get underlying OpenSlide library version */
+std::string OpenSlideImageIO::GetOpenSlideVersion() const {
+  const char * const p_cVersion = OpenSlideWrapper::GetVersion();
+  return p_cVersion != NULL ? std::string(p_cVersion) : std::string();
+}
+
+/** Detect the vendor of the current file. */
 std::string OpenSlideImageIO::GetVendor() const {
   const char * const p_cVendor = OpenSlideWrapper::DetectVendor(this->GetFileName());
   return p_cVendor != NULL ? std::string(p_cVendor) : std::string();
 }
 
+/** Sets the level to read. Level 0 (default) is the highest resolution level.
+ * This method overrides any previously selected associated image. 
+ * Call ReadImageInformation() again after calling this function. */
 void OpenSlideImageIO::SetLevel(int iLevel) {
   if (m_p_clOpenSlideWrapper == NULL)
     return;
@@ -505,6 +544,7 @@ void OpenSlideImageIO::SetLevel(int iLevel) {
   m_p_clOpenSlideWrapper->SetLevel(iLevel);
 }
 
+/** Returns the currently selected level. */
 int OpenSlideImageIO::GetLevel() const {
   if (m_p_clOpenSlideWrapper == NULL)
     return -1;
@@ -512,6 +552,17 @@ int OpenSlideImageIO::GetLevel() const {
   return m_p_clOpenSlideWrapper->GetLevel();
 }
 
+/** Returns the number of available levels. */
+int OpenSlideImageIO::GetLevelCount() const {
+  if (m_p_clOpenSlideWrapper == NULL)
+    return -1;
+
+  return m_p_clOpenSlideWrapper->GetLevelCount();
+}
+
+/** Sets the associated image to extract.
+ * This method overrides any previously selected level.
+ * Call ReadImageInformation() again after calling this function. */
 void OpenSlideImageIO::SetAssociatedImageName(const std::string &strName) {
   if (m_p_clOpenSlideWrapper == NULL)
     return;
@@ -519,6 +570,7 @@ void OpenSlideImageIO::SetAssociatedImageName(const std::string &strName) {
   m_p_clOpenSlideWrapper->SetAssociatedImageName(strName);
 }
 
+/** Returns the currently selected associated image name (empty string if none). */
 std::string OpenSlideImageIO::GetAssociatedImageName() const {
   if (m_p_clOpenSlideWrapper == NULL)
     return std::string();
@@ -526,6 +578,9 @@ std::string OpenSlideImageIO::GetAssociatedImageName() const {
   return m_p_clOpenSlideWrapper->GetAssociatedImageName();
 }
 
+/** Sets the best level to read for the given downsample factor.
+ * This method overrides any previously selected associated image. 
+ * Call ReadImageInformation() again after calling this function. */
 bool OpenSlideImageIO::SetLevelForDownsampleFactor(double dDownsampleFactor) {
   if (m_p_clOpenSlideWrapper == NULL)
     return false;
@@ -533,6 +588,7 @@ bool OpenSlideImageIO::SetLevelForDownsampleFactor(double dDownsampleFactor) {
   return m_p_clOpenSlideWrapper->SetBestLevelForDownsample(dDownsampleFactor);
 }
 
+/** Returns all associated image names stored int he file. */
 OpenSlideImageIO::AssociatedImageNameContainer OpenSlideImageIO::GetAssociatedImageNames() const {
   if (m_p_clOpenSlideWrapper == NULL)
     return AssociatedImageNameContainer();

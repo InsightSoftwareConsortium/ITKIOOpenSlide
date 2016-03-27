@@ -96,6 +96,9 @@ public:
   virtual ImageIORegion
   GenerateStreamableReadRegionFromRequestedRegion( const ImageIORegion & requested ) const;
 
+/** Get underlying OpenSlide library version */
+  virtual std::string GetOpenSlideVersion() const;
+
 /** Detect the vendor of the current file. */
   virtual std::string GetVendor() const;
 
@@ -106,6 +109,9 @@ public:
 
 /** Returns the currently selected level. */
   virtual int GetLevel() const;
+
+/** Returns the number of available levels. */
+  virtual int GetLevelCount() const;
 
 /** Sets the associated image to extract.
  * This method overrides any previously selected level.
