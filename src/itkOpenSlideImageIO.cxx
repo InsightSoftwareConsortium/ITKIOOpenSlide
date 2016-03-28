@@ -260,7 +260,7 @@ public:
     valueStream << p_cValue;
     valueStream >> value;
 
-    return valueStream.fail() || valueStream.bad();
+    return !valueStream.fail() && !valueStream.bad();
   }
 
   template<>
