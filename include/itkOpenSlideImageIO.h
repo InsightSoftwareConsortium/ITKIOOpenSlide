@@ -130,7 +130,7 @@ public:
  * Call ReadImageInformation() again after calling this function. */
   virtual bool SetLevelForDownsampleFactor(double dDownsampleFactor);
 
-/** Returns all associated image names stored int he file. */
+/** Returns all associated image names stored in the file. */
   virtual AssociatedImageNameContainer GetAssociatedImageNames() const;
 
 protected:

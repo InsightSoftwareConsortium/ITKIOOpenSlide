@@ -333,7 +333,7 @@ OpenSlideImageIO::~OpenSlideImageIO()
 void OpenSlideImageIO::PrintSelf(std::ostream& os, Indent indent) const {
   Superclass::PrintSelf(os, indent);
   os << indent << "Level: " << GetLevel() << '\n';
-  os << indent << "Associated Image: " << m_p_clOpenSlideWrapper->GetAssociatedImageName() << '\n';
+  os << indent << "Associated Image: " << GetAssociatedImageName() << '\n';
 }
 
 bool OpenSlideImageIO::CanReadFile( const char* filename ) {
