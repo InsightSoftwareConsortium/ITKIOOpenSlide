@@ -17,7 +17,6 @@
  *=========================================================================*/
 
 #include <cctype>
-#include <memory>
 #include <sstream>
 
 #include "itkIOCommon.h"
@@ -261,7 +260,7 @@ public:
     valueStream << p_cValue;
     valueStream >> value;
 
-    return valueStream.good();
+    return valueStream.fail() || valueStream.bad();
   }
 
   template<>
