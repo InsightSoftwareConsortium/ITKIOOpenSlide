@@ -190,24 +190,6 @@ public:
     return true;
   }
 
-  // Returns the origin of the selected level image. Origin is (0,0) if the function fails.
-  bool GetOrigin(double &dOriginX, double &dOriginY) const {
-    dOriginX = dOriginY = 0.0;
-
-    if (m_p_osr == NULL)
-      return false;
-
-    if (m_strAssociatedImage.size() > 0)
-      return false;
-
-    if (!GetPropertyValue(OPENSLIDE_PROPERTY_NAME_BOUNDS_X, dOriginX) || !GetPropertyValue(OPENSLIDE_PROPERTY_NAME_BOUNDS_Y, dOriginY)) {
-      dOriginX = dOriginY = 0.0;
-      return false;
-    }
-
-    return true;
-  }
-
   // Returns the dimension of the level or associated image
   bool GetDimensions(int64_t &i64Width, int64_t &i64Height) const {
     i64Width = i64Height = 0;
@@ -352,7 +334,7 @@ OpenSlideImageIO::~OpenSlideImageIO()
 void OpenSlideImageIO::PrintSelf(std::ostream& os, Indent indent) const {
   Superclass::PrintSelf(os, indent);
   os << indent << "Level: " << GetLevel() << '\n';
-  os << indent << "Associated Image: " << GetAssociatedImageName() << '\n';
+  os << indent << "Associated Image: " << m_p_clOpenSlideWrapper->GetAssociatedImageName() << '\n';
 }
 
 bool OpenSlideImageIO::CanReadFile( const char* filename ) {
@@ -409,9 +391,8 @@ void OpenSlideImageIO::ReadImageInformation() {
   }
 
 
-  // These functions will fill in default values as needed (in case they fail)
+  // This will fill in default values as needed (in case it fails)
   m_p_clOpenSlideWrapper->GetSpacing(m_Spacing[0], m_Spacing[1]);
-  m_p_clOpenSlideWrapper->GetOrigin(m_Origin[0], m_Origin[1]);
 
   {
     int64_t i64Width = 0, i64Height = 0;
