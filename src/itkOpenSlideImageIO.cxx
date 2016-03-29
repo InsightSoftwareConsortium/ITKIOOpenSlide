@@ -263,7 +263,6 @@ public:
     return !valueStream.fail() && !valueStream.bad();
   }
 
-  template<>
   bool GetPropertyValue(const char *p_cKey, std::string &strValue) const {
     if (m_p_osr == NULL)
       return false;
@@ -568,7 +567,7 @@ bool OpenSlideImageIO::SetLevelForDownsampleFactor(double dDownsampleFactor) {
   return m_p_clOpenSlideWrapper->SetBestLevelForDownsample(dDownsampleFactor);
 }
 
-/** Returns all associated image names stored int he file. */
+/** Returns all associated image names stored in the file. */
 OpenSlideImageIO::AssociatedImageNameContainer OpenSlideImageIO::GetAssociatedImageNames() const {
   if (m_p_clOpenSlideWrapper == NULL)
     return AssociatedImageNameContainer();
