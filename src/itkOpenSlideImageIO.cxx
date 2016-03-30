@@ -409,7 +409,8 @@ void OpenSlideImageIO::ReadImageInformation() {
                          << "Reason: " << strError );
     }
 
-    if (i64Width > std::numeric_limits<itk::SizeValueType>::max() || i64Height > std::numeric_limits<itk::SizeValueType>::max()) {
+    // i64Width and i64Height are known to be positive
+    if ((uint64_t)i64Width > std::numeric_limits<itk::SizeValueType>::max() || (uint64_t)i64Height > std::numeric_limits<itk::SizeValueType>::max()) {
       itkExceptionMacro( "Error OpenSlideImageIO image dimensions are too large for SizeValueType: "
                          << this->GetFileName()
                          << std::endl
@@ -441,7 +442,7 @@ void OpenSlideImageIO::Read( void * buffer)
   const ImageIORegion::SizeType clSize = clRegionToRead.GetSize();
   const ImageIORegion::IndexType clStart = clRegionToRead.GetIndex();
 
-  if ( ((int64_t)clSize[0])*((int64_t)clSize[1]) > std::numeric_limits<ImageIORegion::SizeValueType>::max() ) {
+  if ( ((uint64_t)clSize[0])*((uint64_t)clSize[1]) > std::numeric_limits<ImageIORegion::SizeValueType>::max() ) {
     itkExceptionMacro( "Error OpenSlideImageIO could not read region: "
                        << this->GetFileName()
                        << std::endl
@@ -473,7 +474,7 @@ void OpenSlideImageIO::Read( void * buffer)
   }
 }
 
-bool OpenSlideImageIO::CanWriteFile( const char * name )
+bool OpenSlideImageIO::CanWriteFile( const char * /*name*/ )
 {
   return false;
 }
@@ -489,7 +490,7 @@ OpenSlideImageIO
  *
  */
 void
-OpenSlideImageIO::Write( const void* buffer) {
+OpenSlideImageIO::Write( const void* /*buffer*/) {
 }
 
 /** Given a requested region, determine what could be the region that we can
