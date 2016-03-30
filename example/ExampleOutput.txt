@@ -1,0 +1,202 @@
+# Data from http://openslide.cs.cmu.edu/download/openslide-testdata/Hamamatsu/
+
+$ DumpSlideInformation OS-1.ndpi
+
+Image Information:
+
+Dimensions: 2
+Component type: unsigned_char
+Pixel type: rgba
+Vendor: hamamatsu
+
+Meta Data:
+
+Number of keys: 140
+Entries:
+hamamatsu.AHEX[0] = 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+hamamatsu.AHEX[0].fluorescence = 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+hamamatsu.AHEX[0].ploidy = 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+hamamatsu.AHEX[1] = 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+hamamatsu.AHEX[1].fluorescence = 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+hamamatsu.AHEX[1].ploidy = 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+hamamatsu.AHEX[2] = 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+hamamatsu.AHEX[2].fluorescence = 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+hamamatsu.AHEX[2].ploidy = 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+hamamatsu.Created = 2012/07/24
+hamamatsu.Macro.S/N = 9Y0437
+hamamatsu.NDP.S/N = 870003
+hamamatsu.Objective.Lens.Magnificant = 35.16
+hamamatsu.PSHV = 35
+hamamatsu.PSHV.10x = 10
+hamamatsu.PSHV.40x = 77
+hamamatsu.PSHV.ploidy = 200
+hamamatsu.PSHV.ploidy.10x = 140
+hamamatsu.Product = C12000-02
+hamamatsu.SourceLens = 40
+hamamatsu.Updated = 2012/10/29
+hamamatsu.XOffsetFromSlideCentre = 12644827
+hamamatsu.YOffsetFromSlideCentre = 57700
+hamamatsu.YRNP[0] = 0,0,0,0
+hamamatsu.YRNP[1] = 0,0,0,0
+hamamatsu.YRNP[2] = 0,0,0,0
+hamamatsu.calibration.version = 303
+hamamatsu.ccd.height = 0
+hamamatsu.ccd.width = 9302
+hamamatsu.ccd.width.ploidy = 9302
+hamamatsu.coarse.focus.pitch = 4925
+hamamatsu.colorfilterID = 0
+hamamatsu.cube.kind = 0
+hamamatsu.exposure.barcode.macro = 220
+hamamatsu.exposure.slide.darkfield.macro = 42
+hamamatsu.exposure.slide.macro = 20
+hamamatsu.fine.focus.pitch = 249
+hamamatsu.focalplane.leftbottom = 398494,388654,118084
+hamamatsu.focalplane.lefttop = 198494,388654,118025
+hamamatsu.focalplane.rightbottom = 398494,788654,119012
+hamamatsu.focalplane.righttop = 198494,788654,118894
+hamamatsu.lane.shift.amount = -6
+hamamatsu.roi.barcode.macro = 988,297,1245,655
+hamamatsu.roi.slide.macro = 117,278,1277,674
+hamamatsu.slant.leftbottom = 402293,386782,117697
+hamamatsu.slant.lefttop = 202293,386782,117692
+hamamatsu.slant.rightbottom = 202293,786782,118687
+hamamatsu.slant.righttop = 402293,786782,118601
+hamamatsu.slide.tickness = 0
+hamamatsu.stage.center = 298494,478654
+hamamatsu.system.version = 1.0
+hamamatsu.target.white.intensity = 235
+hamamatsu.valid.DDKP = 1
+hamamatsu.valid.DLTP = 0
+hamamatsu.valid.DSHP = 1
+hamamatsu.variable.exposuretime = 0
+hamamatsu.zCoarse[0] = 0,0,0,0
+hamamatsu.zCoarse[1] = 0,0,0,0
+hamamatsu.zCoarse[2] = 0,0,0,0
+hamamatsu.zFine[0] = 0,0,0,0
+hamamatsu.zFine[1] = 0,0,0,0
+hamamatsu.zFine[2] = 0,0,0,0
+openslide.level-count = 13
+openslide.level[0].downsample = 1
+openslide.level[0].height = 110592
+openslide.level[0].tile-height = 8
+openslide.level[0].tile-width = 4096
+openslide.level[0].width = 122880
+openslide.level[10].downsample = 1024
+openslide.level[10].height = 108
+openslide.level[10].tile-height = 4
+openslide.level[10].tile-width = 4
+openslide.level[10].width = 120
+openslide.level[11].downsample = 2048
+openslide.level[11].height = 54
+openslide.level[11].tile-height = 2
+openslide.level[11].tile-width = 2
+openslide.level[11].width = 60
+openslide.level[12].downsample = 4096
+openslide.level[12].height = 27
+openslide.level[12].tile-height = 1
+openslide.level[12].tile-width = 1
+openslide.level[12].width = 30
+openslide.level[1].downsample = 2
+openslide.level[1].height = 55296
+openslide.level[1].tile-height = 8
+openslide.level[1].tile-width = 2048
+openslide.level[1].width = 61440
+openslide.level[2].downsample = 4
+openslide.level[2].height = 27648
+openslide.level[2].tile-height = 8
+openslide.level[2].tile-width = 1024
+openslide.level[2].width = 30720
+openslide.level[3].downsample = 8
+openslide.level[3].height = 13824
+openslide.level[3].tile-height = 8
+openslide.level[3].tile-width = 512
+openslide.level[3].width = 15360
+openslide.level[4].downsample = 16
+openslide.level[4].height = 6912
+openslide.level[4].tile-height = 8
+openslide.level[4].tile-width = 256
+openslide.level[4].width = 7680
+openslide.level[5].downsample = 32
+openslide.level[5].height = 3456
+openslide.level[5].tile-height = 8
+openslide.level[5].tile-width = 128
+openslide.level[5].width = 3840
+openslide.level[6].downsample = 64
+openslide.level[6].height = 1728
+openslide.level[6].tile-height = 8
+openslide.level[6].tile-width = 64
+openslide.level[6].width = 1920
+openslide.level[7].downsample = 128
+openslide.level[7].height = 864
+openslide.level[7].tile-height = 8
+openslide.level[7].tile-width = 32
+openslide.level[7].width = 960
+openslide.level[8].downsample = 256
+openslide.level[8].height = 432
+openslide.level[8].tile-height = 8
+openslide.level[8].tile-width = 16
+openslide.level[8].width = 480
+openslide.level[9].downsample = 512
+openslide.level[9].height = 216
+openslide.level[9].tile-height = 8
+openslide.level[9].tile-width = 8
+openslide.level[9].width = 240
+openslide.mpp-x = 0.22709724303946949
+openslide.mpp-y = 0.22710240047237298
+openslide.objective-power = 40
+openslide.quickhash-1 = 1b7fc61271ab42b63379c8b09e11a99e22b838d133a7a91350165a086bcd451c
+openslide.vendor = hamamatsu
+tiff.DateTime = 2012:10:30 17:37:48
+tiff.Make = Hamamatsu
+tiff.Model = C12000-02
+tiff.ResolutionUnit = centimeter
+tiff.Software = NDP.scan 3.0.4
+tiff.XResolution = 44034
+tiff.YResolution = 44033
+
+Level Information:
+
+Level count: 13
+Levels:
+Level 0: dimensions = [122880, 110592], spacing = [0.227097, 0.227102], size in bytes = 54358179840
+Level 1: dimensions = [61440, 55296], spacing = [0.454194, 0.454205], size in bytes = 13589544960
+Level 2: dimensions = [30720, 27648], spacing = [0.908389, 0.90841], size in bytes = 3397386240
+Level 3: dimensions = [15360, 13824], spacing = [1.81678, 1.81682], size in bytes = 849346560
+Level 4: dimensions = [7680, 6912], spacing = [3.63356, 3.63364], size in bytes = 212336640
+Level 5: dimensions = [3840, 3456], spacing = [7.26711, 7.26728], size in bytes = 53084160
+Level 6: dimensions = [1920, 1728], spacing = [14.5342, 14.5346], size in bytes = 13271040
+Level 7: dimensions = [960, 864], spacing = [29.0684, 29.0691], size in bytes = 3317760
+Level 8: dimensions = [480, 432], spacing = [58.1369, 58.1382], size in bytes = 829440
+Level 9: dimensions = [240, 216], spacing = [116.274, 116.276], size in bytes = 207360
+Level 10: dimensions = [120, 108], spacing = [232.548, 232.553], size in bytes = 51840
+Level 11: dimensions = [60, 54], spacing = [465.095, 465.106], size in bytes = 12960
+Level 12: dimensions = [30, 27], spacing = [930.19, 930.211], size in bytes = 3240
+
+Associated image information:
+
+Number of associated images: 1
+Associated image names:
+'macro'
+
+Associated images:
+macro: dimensions = [1160, 396], spacing = [1, 1], size in bytes = 1837440
+
+Writing level images to file ...
+
+Level 0 image is too large. Skipping.
+Level 1 image is too large. Skipping.
+Level 2 image is too large. Skipping.
+Level 3 image is too large. Skipping.
+Level 4 image is too large. Skipping.
+Wrting level 5 to 'level5.tiff' ...
+Wrting level 6 to 'level6.tiff' ...
+Wrting level 7 to 'level7.tiff' ...
+Wrting level 8 to 'level8.tiff' ...
+Wrting level 9 to 'level9.tiff' ...
+Wrting level 10 to 'level10.tiff' ...
+Wrting level 11 to 'level11.tiff' ...
+Wrting level 12 to 'level12.tiff' ...
+
+Writing associated images to file ...
+
+Writing associated image 'macro' to 'macro.tiff' ...
