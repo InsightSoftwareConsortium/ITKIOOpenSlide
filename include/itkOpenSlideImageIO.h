@@ -18,11 +18,13 @@
 #ifndef __itkOpenSlideImageIO_h
 #define __itkOpenSlideImageIO_h
 
-#include <fstream>
 #include "itkImageIOBase.h"
 
 namespace itk
 {
+
+// Forward declare a wrapper class that is responsible for openslide_t (among other things)
+class OpenSlideWrapper;
 
 /** \class OpenSlideImageIO
  *
@@ -30,9 +32,13 @@ namespace itk
  * images (also known as virtual slides).  The following formats can be read:
  *
  * - Trestle (.tif),
- * - Hamamatsu (.vms, .vmu)
+ * - Hamamatsu (.vms, .vmu, .ndpi)
  * - Aperio (.svs, .tif)
  * - MIRAX (.mrxs)
+ * - Leica (.scn)
+ * - Sakura (.svslide)
+ * - Ventana (.bif, .tif)
+ * - Philips (.tiff)
  * - Generic tiled TIFF (.tif)
  *
  *  \ingroup IOFilters
@@ -46,6 +52,7 @@ public:
   typedef OpenSlideImageIO   Self;
   typedef ImageIOBase        Superclass;
   typedef SmartPointer<Self> Pointer;
+  typedef std::vector<std::string> AssociatedImageNameContainer;
 
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
@@ -60,6 +67,12 @@ public:
   /** Determine the file type. Returns true if this ImageIO can read the
    * file specified. */
   virtual bool CanReadFile(const char*);
+
+  /** Determine if the ImageIO can stream reading from the
+      current settings. Default is false. If this is queried after
+      the header of the file has been read then it will indicate if
+      that file can be streamed */
+  virtual bool CanStreamRead();
 
   /** Set the spacing and dimension information for the set filename. */
   virtual void ReadImageInformation();
@@ -87,6 +100,38 @@ public:
   virtual ImageIORegion
   GenerateStreamableReadRegionFromRequestedRegion( const ImageIORegion & requested ) const;
 
+/** Get underlying OpenSlide library version */
+  virtual std::string GetOpenSlideVersion() const;
+
+/** Detect the vendor of the current file. */
+  virtual std::string GetVendor() const;
+
+/** Sets the level to read. Level 0 (default) is the highest resolution level.
+ * This method overrides any previously selected associated image. 
+ * Call ReadImageInformation() again after calling this function. */
+  virtual void SetLevel(int iLevel);
+
+/** Returns the currently selected level. */
+  virtual int GetLevel() const;
+
+/** Returns the number of available levels. */
+  virtual int GetLevelCount() const;
+
+/** Sets the associated image to extract.
+ * This method overrides any previously selected level.
+ * Call ReadImageInformation() again after calling this function. */
+  virtual void SetAssociatedImageName(const std::string &strName);
+
+/** Returns the currently selected associated image name (empty string if none). */
+  virtual std::string GetAssociatedImageName() const;
+
+/** Sets the best level to read for the given downsample factor.
+ * This method overrides any previously selected associated image. 
+ * Call ReadImageInformation() again after calling this function. */
+  virtual bool SetLevelForDownsampleFactor(double dDownsampleFactor);
+
+/** Returns all associated image names stored in the file. */
+  virtual AssociatedImageNameContainer GetAssociatedImageNames() const;
 
 protected:
   OpenSlideImageIO();
@@ -97,7 +142,7 @@ private:
   OpenSlideImageIO(const Self&); //purposely not implemented
   void operator=(const Self&); //purposely not implemented
 
-  std::ifstream     m_InputStream;
+  OpenSlideWrapper *m_p_clOpenSlideWrapper; // Opaque pointer to a wrapper that manages openslide_t
 };
 
 } // end namespace itk

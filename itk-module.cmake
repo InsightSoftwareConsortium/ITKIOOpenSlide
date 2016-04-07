@@ -4,7 +4,7 @@ http://openslide.org.")
 
 itk_module( ITKIOOpenSlide
   DEPENDS
-    ITKIOBase
+    ITKIOImageBase
   TEST_DEPENDS
     ITKTestKernel
   DESCRIPTION
