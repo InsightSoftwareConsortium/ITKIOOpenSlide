@@ -2,6 +2,9 @@
 ITKOpenSlideIO
 =====================
 
+.. image:: https://circleci.com/gh/InsightSoftwareConsortium/ITKIOOpenSlide.svg?style=svg
+    :target: https://circleci.com/gh/InsightSoftwareConsortium/ITKIOOpenSlide
+
 This is an InsightToolkit (ITK) ExternalModule to provide an ImageIO for the
 OpenSlide library supported file formats.  These are generally TIFF-based
 microscopy formats.
