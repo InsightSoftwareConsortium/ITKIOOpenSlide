@@ -26,7 +26,7 @@
 #include "itkMetaDataObject.h"
 
 // OpenSlide
-#include "openslide/openslide.h"
+#include "openslide.h"
 
 namespace itk
 {
