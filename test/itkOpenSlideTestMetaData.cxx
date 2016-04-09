@@ -17,6 +17,8 @@
  *=========================================================================*/
 
 #include <cstring>
+#include <algorithm>
+#include <functional>
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -43,6 +45,28 @@ private:
   std::streambuf * const m_p_originalBuf;
 };
 
+bool ReadFileStripCR(const char *p_cFileName, std::vector<char> &vBuffer) {
+  vBuffer.clear();
+
+  std::ifstream fileStream(p_cFileName);
+  if (!fileStream)
+    return false;
+
+  fileStream.seekg(0, std::ifstream::end);
+  const size_t length = fileStream.tellg();
+  fileStream.seekg(0, std::ifstream::beg);
+
+  vBuffer.resize(length);
+
+  if (!fileStream.read(&vBuffer[0], vBuffer.size()))
+    return false;
+
+  std::vector<char>::iterator newEnd = std::copy_if(vBuffer.begin(), vBuffer.end(), vBuffer.begin(), std::bind2nd(std::not_equal_to<char>(), '\r'));
+  vBuffer.resize(newEnd - vBuffer.begin());
+
+  return true;
+}
+
 } // End anonymous namespace
 
 int itkOpenSlideTestMetaData( int argc, char * argv[] ) {
@@ -62,6 +86,7 @@ int itkOpenSlideTestMetaData( int argc, char * argv[] ) {
   const char * const p_cCompareLog = argc > 3 ? argv[3] : NULL;
 
   std::ofstream logFileStream;
+  std::ostream *p_outStream = &std::cout;
 
   if (strcmp(p_cOutputLog, "stdout") != 0) {
     logFileStream.open(p_cOutputLog, std::ofstream::out | std::ofstream::trunc);
@@ -69,12 +94,12 @@ int itkOpenSlideTestMetaData( int argc, char * argv[] ) {
       std::cerr << "Error: Could not open output log '" << p_cOutputLog << "'." << std::endl;
       return EXIT_FAILURE;
     }
+
+    p_outStream = &logFileStream;
   }
 
-  std::ostream &outStream = strcmp(p_cOutputLog, "stdout") != 0 ? logFileStream : std::cout;
-
   // RAII trick
-  ReplaceStream clStreamGuard(std::cout, outStream);
+  ReplaceStream clStreamGuard(std::cout, *p_outStream);
 
   ImageIOType::Pointer p_clImageIO = ImageIOType::New();
 
@@ -233,38 +258,15 @@ int itkOpenSlideTestMetaData( int argc, char * argv[] ) {
 
     std::vector<char> vBuffer1, vBuffer2;
 
-    std::ifstream inStream;    
-    inStream.open(p_cOutputLog);
-    if (!inStream) {
-      std::cerr << "Error: Could not open output log file '" << p_cOutputLog << "'." << std::endl;
+    if (!ReadFileStripCR(p_cOutputLog, vBuffer1)) {
+      std::cerr << "Error: Could not read output log file '" << p_cOutputLog << "'." << std::endl;
       return EXIT_FAILURE;
     }
 
-    inStream.seekg(0, std::ifstream::end);
-    size_t length = inStream.tellg();
-    inStream.seekg(0, std::ifstream::beg);
-
-    vBuffer1.resize(length);
-    inStream.read(&vBuffer1[0], vBuffer1.size());
-
-    inStream.close();
-    inStream.clear();
-
-    inStream.open(p_cCompareLog);
-    if (!inStream) {
-      std::cerr << "Error: Could not open comparison log file '" << p_cCompareLog << "'." << std::endl;
+    if (!ReadFileStripCR(p_cCompareLog, vBuffer2)) {
+      std::cerr << "Error: Could not read comparison log file '" << p_cCompareLog << "'." << std::endl;
       return EXIT_FAILURE;
     }
-
-    inStream.seekg(0, std::ifstream::end);
-    length = inStream.tellg();
-    inStream.seekg(0, std::ifstream::beg);
-
-    vBuffer2.resize(length);
-    inStream.read(&vBuffer2[0], vBuffer2.size());
-
-    inStream.close();
-    inStream.clear();
 
     if (vBuffer1.size() != vBuffer2.size() || std::memcmp(&vBuffer1[0], &vBuffer2[0], vBuffer1.size()) != 0)
       return EXIT_FAILURE;
