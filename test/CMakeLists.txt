@@ -1,26 +1,43 @@
 itk_module_test()
 set(ITKIOOpenSlideTests
 itkOpenSlideImageIOTest.cxx
+itkOpenSlideTestMetaData.cxx
 )
 
 CreateTestDriver(ITKIOOpenSlide  "${ITKIOOpenSlide-Test_LIBRARIES}" "${ITKIOOpenSlideTests}")
 
-itk_add_test(NAME itkOpenSlideAperioLZWSmall
-      COMMAND ITKIOOpenSlideTestDriver
-      --compare DATA{Input/50232_005p.tif} ${ITK_TEST_OUTPUT_DIR}/itkOpenSlideAperioLZWSmall.mha
-      itkOpenSlideImageIOTest DATA{Input/50232_005p.tif} itkOpenSlideAperioLZWSmall.mha )
+itk_add_test(NAME itkOpenSlideTestMetaData
+  COMMAND ITKIOOpenSlideTestDriver
+  itkOpenSlideTestMetaData DATA{Input/CMU-1.svs} ${ITK_TEST_OUTPUT_DIR}/MetaDataTest.txt DATA{Input/CMU-1.svs.txt}
+)
 
-itk_add_test(NAME itkOpenSlideAperioLZWLarge
-      COMMAND ITKIOOpenSlideTestDriver
-      --compare DATA{Input/50232_100p.svs} ${ITK_TEST_OUTPUT_DIR}/itkOpenSlideAperioLZWLarge.mha
-      itkOpenSlideImageIOTest DATA{Input/50232_100p.svs} itkOpenSlideAperioLZWLarge.mha )
+itk_add_test(NAME itkOpenSlideTestBasicIO
+  COMMAND ITKIOOpenSlideTestDriver
+  --compare DATA{Input/CMU-1-Small-Region.mha} ${ITK_TEST_OUTPUT_DIR}/CMU-1-Small-Region.mha
+  itkOpenSlideImageIOTest DATA{Input/CMU-1-Small-Region.svs} ${ITK_TEST_OUTPUT_DIR}/CMU-1-Small-Region.mha
+)
 
-itk_add_test(NAME itkOpenSlideAperioLZWMultidataset
-      COMMAND ITKIOOpenSlideTestDriver
-      --compare DATA{Input/50232_multidataset_025p.tif} ${ITK_TEST_OUTPUT_DIR}/itkOpenSlideAperioLZWMultidataset.mha
-      itkOpenSlideImageIOTest DATA{Input/50232_multidataset_025p.tif} itkOpenSlideAperioLZWMultidataset.mha )
+itk_add_test(NAME itkOpenSlideTestAssociatedImage
+  COMMAND ITKIOOpenSlideTestDriver
+  --compare DATA{Input/CMU-1-Small-Region-label.mha} ${ITK_TEST_OUTPUT_DIR}/CMU-1-Small-Region-label.mha
+  itkOpenSlideImageIOTest DATA{Input/CMU-1-Small-Region.svs} ${ITK_TEST_OUTPUT_DIR}/CMU-1-Small-Region-label.mha associatedImage=label
+)
 
-itk_add_test(NAME itkOpenSlideAperioJPEG2000
-      COMMAND ITKIOOpenSlideTestDriver
-      --compare DATA{Input/15711_tiled.tif} ${ITK_TEST_OUTPUT_DIR}/itkOpenSlideAperioJPEG2000.mha
-      itkOpenSlideImageIOTest DATA{Input/15711_tiled.tif} itkOpenSlideAperioJPEG2000.mha )
+itk_add_test(NAME itkOpenSlideTestLevel
+  COMMAND ITKIOOpenSlideTestDriver
+  --compare DATA{Input/CMU-3-level-7.mha} ${ITK_TEST_OUTPUT_DIR}/CMU-3-level-7.mha
+  itkOpenSlideImageIOTest DATA{Input/CMU-3.ndpi} ${ITK_TEST_OUTPUT_DIR}/CMU-3-level-7.mha level=7
+)
+
+itk_add_test(NAME itkOpenSlideTestDownsample
+  COMMAND ITKIOOpenSlideTestDriver
+  --compare DATA{Input/CMU-3-level-7.mha} ${ITK_TEST_OUTPUT_DIR}/CMU-3-downsample-129.mha
+  itkOpenSlideImageIOTest DATA{Input/CMU-3.ndpi} ${ITK_TEST_OUTPUT_DIR}/CMU-3-downsample-129.mha downsample=129
+)
+
+itk_add_test(NAME itkOpenSlideTestStreaming
+  COMMAND ITKIOOpenSlideTestDriver
+  --compare DATA{Input/CMU-1-level-1.mha} ${ITK_TEST_OUTPUT_DIR}/CMU-1-level-1.mha
+  itkOpenSlideImageIOTest DATA{Input/CMU-1.svs} ${ITK_TEST_OUTPUT_DIR}/CMU-1-level-1.mha level=1 stream=200
+)
+
