@@ -40,7 +40,7 @@ bool ParseValue(const char *p_cValue, std::string &strCommand, std::string &strV
   if (p_cValue == NULL)
     return false;
 
-  char *p = strchr(p_cValue, '=');
+  const char *p = strchr(p_cValue, '=');
 
   if (p == NULL) {
     strCommand = p_cValue;

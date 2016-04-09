@@ -470,7 +470,7 @@ void OpenSlideImageIO::Read( void * buffer)
     clPixel.SetBlue(p_u32Buffer[i] & 0xff);
     clPixel.SetAlpha((p_u32Buffer[i] >> 24) & 0xff);
 
-    p_u32Buffer[i] = *(uint32_t *)clPixel.GetDataPointer();
+    p_u32Buffer[i] = *reinterpret_cast<uint32_t *>(clPixel.GetDataPointer());
   }
 }
 
