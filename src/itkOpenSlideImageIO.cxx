@@ -154,10 +154,20 @@ public:
     if (m_p_osr == NULL)
       return "OpenSlideWrapper has no file open.";
 
-    if (m_strAssociatedImage.size() > 0)
+    if (m_strAssociatedImage.size() > 0) {
       openslide_read_associated_image(m_p_osr, m_strAssociatedImage.c_str(), p_ui32Dest);
-    else
+    }
+    else {
+      const double dDownsampleFactor = openslide_get_level_downsample(m_p_osr, m_i32Level);
+
+      if (dDownsampleFactor <= 0.0)
+        return "Could not get downsample factor.";
+
+      i64X = (int64_t)(i64X * dDownsampleFactor);
+      i64Y = (int64_t)(i64Y * dDownsampleFactor);
+
       openslide_read_region(m_p_osr, p_ui32Dest, i64X, i64Y, m_i32Level, i64Width, i64Height);
+    }
 
     return openslide_get_error(m_p_osr);
   }
