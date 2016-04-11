@@ -57,6 +57,8 @@ bool ParseValue(const char *p_cValue, std::string &strCommand, std::string &strV
   return true;
 }
 
+#if 0
+// For generating data for tests (particularly the streaming one)
 bool CompressImageFile(const char *p_cFileName) {
   typedef itk::RGBAPixel<unsigned char> PixelType;
   typedef itk::Image<PixelType, 2> ImageType;
@@ -82,6 +84,7 @@ bool CompressImageFile(const char *p_cFileName) {
 
   return true;
 }
+#endif
 
 } // End anonymous namespace
 
@@ -232,12 +235,17 @@ int itkOpenSlideImageIOTest( int argc, char * argv[] ) {
       return iFailCode;
     }
 
+    if (bUseCompression)
+      std::cout << "Warning: Compression may disable streaming." << std::endl;
+
     p_clWriterIO->UseStreamedWritingOn();
 
     p_clWriter->SetImageIO(p_clWriterIO);
     p_clWriter->SetNumberOfStreamDivisions(uiNumStreams);
-    p_clWriter->SetUseCompression(bUseCompression);
   }
+
+  // XXX: Just so you know, this might disable streaming
+  p_clWriter->SetUseCompression(bUseCompression);
 
   try {
     p_clWriter->Update();
