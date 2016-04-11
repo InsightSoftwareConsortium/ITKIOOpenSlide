@@ -57,6 +57,32 @@ bool ParseValue(const char *p_cValue, std::string &strCommand, std::string &strV
   return true;
 }
 
+bool CompressImageFile(const char *p_cFileName) {
+  typedef itk::RGBAPixel<unsigned char> PixelType;
+  typedef itk::Image<PixelType, 2> ImageType;
+
+  typedef itk::ImageFileReader<ImageType> ReaderType;
+  typedef itk::ImageFileWriter<ImageType> WriterType;
+
+  ReaderType::Pointer p_clReader = ReaderType::New();
+  WriterType::Pointer p_clWriter = WriterType::New();
+
+  p_clReader->SetFileName(p_cFileName);
+  p_clWriter->SetInput(p_clReader->GetOutput());
+  p_clWriter->SetFileName(p_cFileName);
+  p_clWriter->UseCompressionOn();
+
+  try {
+    p_clWriter->Update();
+  }
+  catch (itk::ExceptionObject &e) {
+    std::cerr << "Error: " << e << std::endl;
+    return false;
+  }
+
+  return true;
+}
+
 } // End anonymous namespace
 
 int itkOpenSlideImageIOTest( int argc, char * argv[] ) {
@@ -220,6 +246,9 @@ int itkOpenSlideImageIOTest( int argc, char * argv[] ) {
     std::cerr << "Error: " << e << std::endl;
     return iFailCode;
   }
+
+  // Use this to compress output images when updating tests
+  //CompressImageFile(p_cOutputImage);
 
   return iSuccessCode;
 }
