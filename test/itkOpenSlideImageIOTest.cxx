@@ -79,6 +79,7 @@ int itkOpenSlideImageIOTest( int argc, char * argv[] ) {
   argv += 3;
 
   bool bShouldFail = false;
+  bool bUseCompression = false;
   unsigned int uiNumStreams = 0; // 0 means no streaming
   int iLevel = 0;
   std::string strAssociatedImageName;
@@ -95,6 +96,9 @@ int itkOpenSlideImageIOTest( int argc, char * argv[] ) {
 
     if (strCommand == "shouldFail") {
       bShouldFail = true;
+    }
+    else if (strCommand == "compress") {
+      bUseCompression = true;
     }
     else if (strCommand == "level") {
       if (strValue.empty()) {
@@ -156,6 +160,7 @@ int itkOpenSlideImageIOTest( int argc, char * argv[] ) {
   std::cout << "inputImage = '" << p_cInputImage << '\'' << std::endl;
   std::cout << "outputImage = '" << p_cOutputImage << '\'' << std::endl;
   std::cout << "shouldFail = " << std::boolalpha << bShouldFail << std::endl;
+  std::cout << "compress = " << std::boolalpha << bUseCompression << std::endl;
   std::cout << "stream = " << uiNumStreams << std::endl;
   std::cout << "level = " << iLevel << std::endl;
   std::cout << "associatedImage = '" << strAssociatedImageName << '\'' << std::endl;
@@ -205,6 +210,7 @@ int itkOpenSlideImageIOTest( int argc, char * argv[] ) {
 
     p_clWriter->SetImageIO(p_clWriterIO);
     p_clWriter->SetNumberOfStreamDivisions(uiNumStreams);
+    p_clWriter->SetUseCompression(bUseCompression);
   }
 
   try {
