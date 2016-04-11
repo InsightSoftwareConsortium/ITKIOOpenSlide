@@ -163,6 +163,9 @@ public:
       if (dDownsampleFactor <= 0.0)
         return "Could not get downsample factor.";
 
+      // NOTE: API expects level 0 coordinates. So we upsample the coordinates.
+      // XXX: This can subtly change the image compared to reading all at once.
+      //      The handling of coordinates internally in OpenSlide is quite similar!
       i64X = (int64_t)(i64X * dDownsampleFactor);
       i64Y = (int64_t)(i64Y * dDownsampleFactor);
 
@@ -293,7 +296,7 @@ private:
 
 OpenSlideImageIO::OpenSlideImageIO()
 {
-  typedef itk::RGBAPixel<unsigned char> PixelType;
+  typedef RGBAPixel<unsigned char> PixelType;
   PixelType clPixel;
 
   m_p_clOpenSlideWrapper = NULL;
@@ -420,13 +423,13 @@ void OpenSlideImageIO::ReadImageInformation() {
     }
 
     // i64Width and i64Height are known to be positive
-    if ((uint64_t)i64Width > std::numeric_limits<itk::SizeValueType>::max() || (uint64_t)i64Height > std::numeric_limits<itk::SizeValueType>::max()) {
+    if ((uint64_t)i64Width > std::numeric_limits<SizeValueType>::max() || (uint64_t)i64Height > std::numeric_limits<SizeValueType>::max()) {
       itkExceptionMacro( "Error OpenSlideImageIO image dimensions are too large for SizeValueType: "
                          << this->GetFileName()
                          << std::endl
                          << "Reason: " 
-                         << i64Width << " > " << std::numeric_limits<itk::SizeValueType>::max() 
-                         << " or " << i64Height << " > " << std::numeric_limits<itk::SizeValueType>::max() );
+                         << i64Width << " > " << std::numeric_limits<SizeValueType>::max() 
+                         << " or " << i64Height << " > " << std::numeric_limits<SizeValueType>::max() );
     }
 
     m_Dimensions[0] = (SizeValueType)i64Width;
