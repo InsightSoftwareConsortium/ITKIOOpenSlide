@@ -61,7 +61,7 @@ bool ParseValue(const char *p_cValue, std::string &strCommand, std::string &strV
 // For generating data for tests (particularly the streaming one)
 bool CompressImageFile(const char *p_cFileName) {
   typedef itk::RGBAPixel<unsigned char> PixelType;
-  typedef itk::Image<PixelType, 2> ImageType;
+  typedef itk::Image<PixelType, 2>      ImageType;
 
   typedef itk::ImageFileReader<ImageType> ReaderType;
   typedef itk::ImageFileWriter<ImageType> WriterType;
@@ -89,9 +89,9 @@ bool CompressImageFile(const char *p_cFileName) {
 } // End anonymous namespace
 
 int itkOpenSlideImageIOTest( int argc, char * argv[] ) {
-  typedef itk::RGBAPixel<unsigned char> PixelType;
-  typedef itk::Image<PixelType, 2> ImageType;
-  typedef itk::OpenSlideImageIO ReaderIOType;
+  typedef itk::RGBAPixel<unsigned char>   PixelType;
+  typedef itk::Image<PixelType, 2>        ImageType;
+  typedef itk::OpenSlideImageIO           ReaderIOType;
   typedef itk::ImageFileReader<ImageType> ReaderType;
   typedef itk::ImageFileWriter<ImageType> WriterType;
 
@@ -260,4 +260,3 @@ int itkOpenSlideImageIOTest( int argc, char * argv[] ) {
 
   return iSuccessCode;
 }
-

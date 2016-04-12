@@ -15,8 +15,8 @@
  *  limitations under the License.
  *
  *=========================================================================*/
-#ifndef __itkOpenSlideImageIOFactory_h
-#define __itkOpenSlideImageIOFactory_h
+#ifndef itkOpenSlideImageIOFactory_h
+#define itkOpenSlideImageIOFactory_h
 
 #include "itkObjectFactoryBase.h"
 #include "itkImageIOBase.h"

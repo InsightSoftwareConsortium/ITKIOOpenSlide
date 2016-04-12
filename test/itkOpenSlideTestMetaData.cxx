@@ -33,15 +33,15 @@ namespace {
 class ReplaceStream {
 public:
   ReplaceStream(std::ios &stream, const std::ios &newStream)
-  : m_stream(stream), m_p_originalBuf(stream.rdbuf(newStream.rdbuf())) { }
+  : m_Stream(stream), m_OriginalBuf(stream.rdbuf(newStream.rdbuf())) { }
 
   ~ReplaceStream() {
-    m_stream.rdbuf(m_p_originalBuf);
+    m_Stream.rdbuf(m_OriginalBuf);
   }
 
 private:
-  std::ios &m_stream;
-  std::streambuf * const m_p_originalBuf;
+  std::ios               &m_Stream;
+  std::streambuf * const m_OriginalBuf;
 };
 
 bool ReadFileStripCR(const char *p_cFileName, std::vector<char> &vBuffer) {
@@ -76,11 +76,11 @@ bool ReadFileStripCR(const char *p_cFileName, std::vector<char> &vBuffer) {
 } // End anonymous namespace
 
 int itkOpenSlideTestMetaData( int argc, char * argv[] ) {
-  typedef itk::OpenSlideImageIO ImageIOType;
+  typedef itk::OpenSlideImageIO         ImageIOType;
   typedef itk::RGBAPixel<unsigned char> PixelType;
-  typedef itk::Image<PixelType, 2> ImageType;
-  typedef ImageType::SizeType SizeType;
-  typedef ImageType::SpacingType SpacingType;
+  typedef itk::Image<PixelType, 2>      ImageType;
+  typedef ImageType::SizeType           SizeType;
+  typedef ImageType::SpacingType        SpacingType;
 
   if (argc < 2 || argc > 4) {
     std::cerr << "Usage: " << argv[0] << " slideFile [outputLog] [comparisonLog]" << std::endl;
@@ -280,4 +280,3 @@ int itkOpenSlideTestMetaData( int argc, char * argv[] ) {
 
   return EXIT_SUCCESS;
 }
-

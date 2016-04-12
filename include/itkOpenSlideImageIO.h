@@ -15,8 +15,8 @@
  *  limitations under the License.
  *
  *=========================================================================*/
-#ifndef __itkOpenSlideImageIO_h
-#define __itkOpenSlideImageIO_h
+#ifndef itkOpenSlideImageIO_h
+#define itkOpenSlideImageIO_h
 
 #include "itkImageIOBase.h"
 
@@ -49,9 +49,9 @@ class ITK_EXPORT OpenSlideImageIO : public ImageIOBase
 {
 public:
   /** Standard class typedefs. */
-  typedef OpenSlideImageIO   Self;
-  typedef ImageIOBase        Superclass;
-  typedef SmartPointer<Self> Pointer;
+  typedef OpenSlideImageIO         Self;
+  typedef ImageIOBase              Superclass;
+  typedef SmartPointer<Self>       Pointer;
   typedef std::vector<std::string> AssociatedImageNameContainer;
 
   /** Method for creation through the object factory. */
@@ -142,9 +142,9 @@ private:
   OpenSlideImageIO(const Self&); //purposely not implemented
   void operator=(const Self&); //purposely not implemented
 
-  OpenSlideWrapper *m_p_clOpenSlideWrapper; // Opaque pointer to a wrapper that manages openslide_t
+  OpenSlideWrapper *m_OpenSlideWrapper; // Opaque pointer to a wrapper that manages openslide_t
 };
 
 } // end namespace itk
 
-#endif // __itkOpenSlideImageIO_h
+#endif // itkOpenSlideImageIO_h
