@@ -18,7 +18,6 @@
 
 #include <cstring>
 #include <algorithm>
-#include <functional>
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -61,8 +60,15 @@ bool ReadFileStripCR(const char *p_cFileName, std::vector<char> &vBuffer) {
   if (!fileStream.read(&vBuffer[0], vBuffer.size()))
     return false;
 
-  std::vector<char>::iterator newEnd = std::copy_if(vBuffer.begin(), vBuffer.end(), vBuffer.begin(), std::bind2nd(std::not_equal_to<char>(), '\r'));
-  vBuffer.resize(newEnd - vBuffer.begin());
+  size_t j = 0;
+  for (size_t i = 0; i < vBuffer.size(); ++i) {
+    if (vBuffer[i] != '\r') {
+      vBuffer[j] = vBuffer[i];
+      ++j;
+    }
+  }
+
+  vBuffer.resize(j);
 
   return true;
 }
