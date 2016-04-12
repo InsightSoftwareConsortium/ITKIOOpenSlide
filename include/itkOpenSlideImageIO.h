@@ -28,8 +28,8 @@ class OpenSlideWrapper;
 
 /** \class OpenSlideImageIO
  *
- * OpenSlide is a C library that provides a simple interface to read whole-slide
- * images (also known as virtual slides).  The following formats can be read:
+ * \brief OpenSlide is a C library that provides a simple interface to read whole-slide
+ * images (also known as virtual slides). The following formats can be read:
  *
  * - Trestle (.tif),
  * - Hamamatsu (.vms, .vmu, .ndpi)
@@ -41,9 +41,12 @@ class OpenSlideWrapper;
  * - Philips (.tiff)
  * - Generic tiled TIFF (.tif)
  *
+ *  \warning Streaming level images other than level 0 may not give pixel-by-pixel
+ *  identical images as reading the image in all at once.
+ *
  *  \ingroup IOFilters
  *
- *  \ingroup \ITKIOOpenSlide
+ *  \ingroup ITKIOOpenSlide
  */
 class ITK_EXPORT OpenSlideImageIO : public ImageIOBase
 {

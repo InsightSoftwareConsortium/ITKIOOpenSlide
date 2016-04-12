@@ -28,6 +28,8 @@ namespace itk
  * \brief OpenSlide is a C library that provides a simple interface
  * to read whole-slide images (also known as virtual slides).
  *
+ * \ingroup ITKIOOpenSlide
+ *
  */
 class ITK_EXPORT OpenSlideImageIOFactory : public ObjectFactoryBase
 {
