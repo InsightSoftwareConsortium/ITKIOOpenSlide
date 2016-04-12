@@ -57,12 +57,41 @@ bool ParseValue(const char *p_cValue, std::string &strCommand, std::string &strV
   return true;
 }
 
+#if 0
+// For generating data for tests (particularly the streaming one)
+bool CompressImageFile(const char *p_cFileName) {
+  typedef itk::RGBAPixel<unsigned char> PixelType;
+  typedef itk::Image<PixelType, 2>      ImageType;
+
+  typedef itk::ImageFileReader<ImageType> ReaderType;
+  typedef itk::ImageFileWriter<ImageType> WriterType;
+
+  ReaderType::Pointer p_clReader = ReaderType::New();
+  WriterType::Pointer p_clWriter = WriterType::New();
+
+  p_clReader->SetFileName(p_cFileName);
+  p_clWriter->SetInput(p_clReader->GetOutput());
+  p_clWriter->SetFileName(p_cFileName);
+  p_clWriter->UseCompressionOn();
+
+  try {
+    p_clWriter->Update();
+  }
+  catch (itk::ExceptionObject &e) {
+    std::cerr << "Error: " << e << std::endl;
+    return false;
+  }
+
+  return true;
+}
+#endif
+
 } // End anonymous namespace
 
 int itkOpenSlideImageIOTest( int argc, char * argv[] ) {
-  typedef itk::RGBAPixel<unsigned char> PixelType;
-  typedef itk::Image<PixelType, 2> ImageType;
-  typedef itk::OpenSlideImageIO ReaderIOType;
+  typedef itk::RGBAPixel<unsigned char>   PixelType;
+  typedef itk::Image<PixelType, 2>        ImageType;
+  typedef itk::OpenSlideImageIO           ReaderIOType;
   typedef itk::ImageFileReader<ImageType> ReaderType;
   typedef itk::ImageFileWriter<ImageType> WriterType;
 
@@ -79,6 +108,7 @@ int itkOpenSlideImageIOTest( int argc, char * argv[] ) {
   argv += 3;
 
   bool bShouldFail = false;
+  bool bUseCompression = false;
   unsigned int uiNumStreams = 0; // 0 means no streaming
   int iLevel = 0;
   std::string strAssociatedImageName;
@@ -95,6 +125,9 @@ int itkOpenSlideImageIOTest( int argc, char * argv[] ) {
 
     if (strCommand == "shouldFail") {
       bShouldFail = true;
+    }
+    else if (strCommand == "compress") {
+      bUseCompression = true;
     }
     else if (strCommand == "level") {
       if (strValue.empty()) {
@@ -156,6 +189,7 @@ int itkOpenSlideImageIOTest( int argc, char * argv[] ) {
   std::cout << "inputImage = '" << p_cInputImage << '\'' << std::endl;
   std::cout << "outputImage = '" << p_cOutputImage << '\'' << std::endl;
   std::cout << "shouldFail = " << std::boolalpha << bShouldFail << std::endl;
+  std::cout << "compress = " << std::boolalpha << bUseCompression << std::endl;
   std::cout << "stream = " << uiNumStreams << std::endl;
   std::cout << "level = " << iLevel << std::endl;
   std::cout << "associatedImage = '" << strAssociatedImageName << '\'' << std::endl;
@@ -201,11 +235,17 @@ int itkOpenSlideImageIOTest( int argc, char * argv[] ) {
       return iFailCode;
     }
 
+    if (bUseCompression)
+      std::cout << "Warning: Compression may disable streaming." << std::endl;
+
     p_clWriterIO->UseStreamedWritingOn();
 
     p_clWriter->SetImageIO(p_clWriterIO);
     p_clWriter->SetNumberOfStreamDivisions(uiNumStreams);
   }
+
+  // XXX: Just so you know, this might disable streaming
+  p_clWriter->SetUseCompression(bUseCompression);
 
   try {
     p_clWriter->Update();
@@ -215,6 +255,8 @@ int itkOpenSlideImageIOTest( int argc, char * argv[] ) {
     return iFailCode;
   }
 
+  // Use this to compress output images when updating tests
+  //CompressImageFile(p_cOutputImage);
+
   return iSuccessCode;
 }
-

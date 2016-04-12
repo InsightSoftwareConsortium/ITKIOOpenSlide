@@ -15,8 +15,8 @@
  *  limitations under the License.
  *
  *=========================================================================*/
-#ifndef __itkOpenSlideImageIOFactory_h
-#define __itkOpenSlideImageIOFactory_h
+#ifndef itkOpenSlideImageIOFactory_h
+#define itkOpenSlideImageIOFactory_h
 
 #include "itkObjectFactoryBase.h"
 #include "itkImageIOBase.h"
@@ -27,6 +27,8 @@ namespace itk
  *
  * \brief OpenSlide is a C library that provides a simple interface
  * to read whole-slide images (also known as virtual slides).
+ *
+ * \ingroup ITKIOOpenSlide
  *
  */
 class ITK_EXPORT OpenSlideImageIOFactory : public ObjectFactoryBase
