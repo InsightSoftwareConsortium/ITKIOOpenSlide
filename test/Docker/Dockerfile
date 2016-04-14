@@ -23,8 +23,8 @@ RUN apt-get update && apt-get install -y \
 RUN mkdir -p /usr/src/ITKOpenSlideIO-build
 WORKDIR /usr/src
 
-# 2016-04-07
-ENV ITK_GIT_TAG 399f5ea69b063a3a02376806059d8d12e8953214
+# 2016-04-14
+ENV ITK_GIT_TAG 141bf9929f73b3f928ea022ed670959e81d036ff
 RUN git clone git://itk.org/ITK.git && \
   cd ITK && \
   git checkout ${ITK_GIT_TAG} && \
