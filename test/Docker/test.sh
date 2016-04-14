@@ -17,6 +17,8 @@ cmake \
     /usr/src/ITKOpenSlideIO
 ctest -VV -D Experimental
 
+mkdir -p /usr/src/ITKOpenSlideIO-example-build
+cd /usr/src/ITKOpenSlideIO-example-build
 cmake \
   -G Ninja \
   -DITK_DIR:PATH=/usr/src/ITK-build \
