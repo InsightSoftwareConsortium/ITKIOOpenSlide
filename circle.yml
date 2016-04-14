@@ -6,11 +6,13 @@ dependencies:
   override:
     - docker info
     - docker pull insighttoolkit/openslideio-test
-    - ~/ITKIOOpenSlide/test/Docker/build.sh
+    - ~/ITKIOOpenSlide/test/Docker/build.sh:
+        timeout: 2000
 
 test:
   override:
-    - ~/ITKIOOpenSlide/test/Docker/run.sh
+    - ~/ITKIOOpenSlide/test/Docker/run.sh:
+        timeout: 2000
 
 deployment:
   hub:
