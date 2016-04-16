@@ -720,11 +720,11 @@ OpenSlideImageIO::GenerateStreamableReadRegionFromRequestedRegion( const ImageIO
   if (!m_OpenSlideWrapper->AlignReadRegion(i64X, i64Y, i64Width, i64Height))
     return requested;
 
-  clStart[0] = i64X;
-  clStart[1] = i64Y;
+  clStart[0] = (SizeValueType)i64X;
+  clStart[1] = (SizeValueType)i64Y;
 
-  clSize[0] = i64Width;
-  clSize[1] = i64Height;
+  clSize[0] = (SizeValueType)i64Width;
+  clSize[1] = (SizeValueType)i64Height;
 
   ImageIORegion clNewRegion(requested);
 
