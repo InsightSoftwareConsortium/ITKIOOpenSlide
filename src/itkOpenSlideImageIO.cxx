@@ -763,7 +763,33 @@ OpenSlideImageIO::Write( const void* /*buffer*/) {
 RequestedRegion */
 ImageIORegion
 OpenSlideImageIO::GenerateStreamableReadRegionFromRequestedRegion( const ImageIORegion & requested ) const {
-  return requested;
+  if (m_OpenSlideWrapper == NULL)
+    return requested;
+
+  ImageIORegion::SizeType clSize = requested.GetSize();
+  ImageIORegion::IndexType clStart = requested.GetIndex();
+
+  int64_t i64X = clStart[0];
+  int64_t i64Y = clStart[1];
+
+  int64_t i64Width = clSize[0];
+  int64_t i64Height = clSize[1];
+
+  if (!m_OpenSlideWrapper->AlignReadRegion(i64X, i64Y, i64Width, i64Height))
+    return requested;
+
+  clStart[0] = i64X;
+  clStart[1] = i64Y;
+
+  clSize[0] = i64Width;
+  clSize[1] = i64Height;
+
+  ImageIORegion clNewRegion(requested);
+
+  clNewRegion.SetSize(clSize);
+  clNewRegion.SetIndex(clStart);
+
+  return clNewRegion;
 }
 
 /** Get underlying OpenSlide library version */
