@@ -17,6 +17,7 @@
  *=========================================================================*/
 
 #include <cctype>
+#include <algorithm>
 #include <sstream>
 
 #include "itkIOCommon.h"
@@ -30,6 +31,101 @@
 
 namespace itk
 {
+
+namespace
+{
+
+// A miniature version of vnl_rational for 64 bit integers
+class Rational {
+public:
+  // GCD Algorithm from wikipedia pseudo code: 
+  // https://en.wikipedia.org/wiki/Greatest_common_divisor#Binary_method
+  // 
+  // NOTE: While vnl_rational can do this too, vnl_rational is defined for long integers (32 bit integers on amd64).
+  //       Slides can be extremely large. It would ideal to work with 64 bit integers.
+
+  static uint64_t GCD(uint64_t ui64A, uint64_t ui64B) {
+    if (ui64A == 0)
+      return ui64B;
+
+    if (ui64B == 0)
+      return ui64A;
+
+    unsigned int uiExp = 0;
+    while ((ui64A & 1) == 0 && (ui64B & 1) == 0) {
+      ui64A >>= 1;
+      ui64B >>= 1;
+      ++uiExp;
+    }
+
+    while (ui64A != ui64B) {
+      if ((ui64A & 1) == 0)
+        ui64A >>= 1;
+      else if ((ui64B & 1) == 0)
+        ui64B >>= 1;
+      else if (ui64A > ui64B)
+        ui64A = (ui64A - ui64B) >> 1;
+      else
+        ui64B = (ui64B - ui64A) >> 1;
+    }
+
+    return ui64A << uiExp;
+  }
+
+  Rational()
+  : m_Numerator(0), m_Denominator(1) { }
+
+  Rational(int64_t i64Numerator, int64_t i64Denominator) {
+    Set(i64Numerator, i64Denominator);
+  }
+
+  // Set and reduce the numerator/denominator
+  void Set(int64_t i64Numerator, int64_t i64Denominator) {
+    m_Numerator = std::abs(i64Numerator);
+    m_Denominator = std::abs(i64Denominator);
+
+    const int64_t i64Divisor = (int64_t)GCD(m_Numerator, m_Denominator);
+
+    // Put the sign back (if needed)
+    if ((i64Numerator < 0) ^ (i64Denominator < 0))
+      m_Numerator = -m_Numerator;
+
+    if (i64Divisor != 0) {
+      m_Numerator /= i64Divisor;
+      m_Denominator /= i64Divisor;
+    }
+  }
+
+  int64_t Numerator() const {
+    return m_Numerator;
+  }
+
+  int64_t Denominator() const {
+    return m_Denominator;
+  }
+
+  // XXX: Most operators are missing!
+
+  Rational & operator=(int64_t i64Value) {
+    m_Numerator = i64Value;
+    m_Denominator = 1;
+    return *this;
+  }
+
+  bool operator>(int64_t i64Value) const {
+    return m_Denominator * i64Value > m_Numerator;
+  }
+
+  bool operator!() const {
+    return !m_Numerator;
+  }
+
+private:
+  int64_t m_Numerator;
+  int64_t m_Denominator;
+};
+
+} // End anonymous namespace
 
 // OpenSlide wrapper class
 // This is responsible for freeing the OpenSlide context on destruction
