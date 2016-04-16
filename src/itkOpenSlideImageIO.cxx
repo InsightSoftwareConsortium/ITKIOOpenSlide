@@ -116,6 +116,14 @@ public:
     return m_Denominator * i64Value > m_Numerator;
   }
 
+  bool operator==(int64_t i64Value) const {
+    return m_Denominator * i64Value == m_Numerator;
+  }
+
+  bool operator!=(int64_t i64Value) const {
+    return !(*this == i64Value);
+  }
+
   bool operator!() const {
     return !m_Numerator;
   }
@@ -203,6 +211,9 @@ public:
   void SetLevel(int32_t i32Level) {
     m_Level = i32Level;
     m_AssociatedImage.clear();
+
+    m_DownsampleX = 0;
+    m_DownsampleY = 0;
   }
 
   // Returns the currently selected level
@@ -214,6 +225,9 @@ public:
   void SetAssociatedImageName(const std::string &strImageName) {
     m_AssociatedImage = strImageName;
     m_Level = 0;
+
+    m_DownsampleX = 0;
+    m_DownsampleY = 0;
   }
 
   // Returns the currently selected associated image
@@ -388,6 +402,70 @@ private:
   openslide_t *m_Osr;
   int32_t      m_Level;
   std::string  m_AssociatedImage;
+  Rational     m_DownsampleX;
+  Rational     m_DownsampleY;
+
+  // Compute rational downsample factors
+  // Explanation:
+  // OpenSlide expects level 0 coordinates in openslide_read_region(). This is OK if we're reading level 0 images.
+  // However, if we're reading level L images with L > 0, this becomes problematic. This can be seen with a little math.
+  // First, note the equation relating level 0 and level L coordinates:
+  //
+  // x_0 = D * x_L
+  //
+  // Here D is the downsample factor and is a real number (openslide_get_level_downsample() returns double).
+  // From OpenSlide's source code, OpenSlide downsamples x_0 to x_L with a floor operation:
+  //
+  // x_L = floor(x_0 / D)
+  //
+  // Likewise, OpenSlide upsamples x_0 with a floor operation
+  //
+  // x_0 = floor(x_L * D)
+  //
+  // In this implementation, ITK works with coordinates at the selected level. When L > 0, it becomes challenging
+  // to pick coordinates x_0 that identify x_L exactly. We derive x_0 by upsampling as above. But several values of x_0 will map to x_L.
+  // We need to pick x_L so that it is invarient to an upsample and subsequent downsample. In math:
+  //
+  // x_L = Downsample(Upsample(x_L)) = floor(floor(x_L * D) / D)
+  //
+  // D is known to be a rational number A/B since it is computed by dividing the dimensions of level 0 and level L images.
+  // If A/B is a reduced fraction, we would like to determine x_L so that it is divisible by B. When B divides x_L we have the identity:
+  //
+  // Upsample(x_L) = D * x_L
+  //
+  // A subsequent downsample gives:
+  //
+  // Downsample(D * x_L) = x_L
+  //
+  // Which is what we wanted. Consequently, if dimensions are coprime, the image cannot technically be streamed.
+  // In that case the ImageIORegion would reflect entire level L image. 
+  // This wrapper also supports an approximate image (ignoring this issue).
+  bool ComputeDownsampleFactors() {
+    if (m_Osr == NULL)
+      return false;
+
+    // Streaming is not supported on associated images
+    if (m_AssociatedImage.size() > 0)
+      return false;
+
+    // Downsample factors already computed?
+    if (m_DownsampleX != 0 && m_DownsampleY != 0)
+      return true;
+
+    int64_t i64WidthLevel0 = 0, i64HeightLevel0 = 0;
+    int64_t i64WidthLevelL = 0, i64HeightLevelL = 0;
+
+    openslide_get_level0_dimensions(m_Osr, &i64WidthLevel0, &i64HeightLevel0);
+    openslide_get_level_dimensions(m_Osr, m_Level, &i64WidthLevelL, &i64HeightLevelL);
+
+    if (i64WidthLevel0 <= 0 || i64HeightLevel0 <= 0 || i64WidthLevelL <= 0 || i64HeightLevelL <= 0)
+      return false;
+
+    m_DownsampleX.Set(i64WidthLevel0, i64WidthLevelL);
+    m_DownsampleY.Set(i64HeightLevel0, i64HeightLevelL);
+
+    return true;
+  }
 };
 
 OpenSlideImageIO::OpenSlideImageIO()
