@@ -175,7 +175,10 @@ public:
   // Tells the ImageIO if the wrapper is in a state where stream reading can occur.
   // While OpenSlide supports reading regions of level images, it does not for associated images.
   bool CanStreamRead() const {
-    return m_AssociatedImage.empty();
+    if (m_AssociatedImage.size() > 0)
+      return false;
+
+    return ComputeMaximumNumberOfStreamableRegions() > 1;
   }
 
   // Closes the currently opened file
@@ -398,12 +401,39 @@ public:
     return true;
   }
 
+  bool ComputeMinimumStreamableRegionSize(int64_t &i64Width, int64_t &i64Height) const {
+    if (!ComputeDownsampleFactors())
+      return false;
+
+    i64Width = m_DownsampleX.Denominator();
+    i64Height = m_DownsampleY.Denominator();
+
+    return true;
+  }
+
+  int64_t ComputeMaximumNumberOfStreamableRegions() const {
+    int64_t i64RegionWidth = 0, i64RegionHeight = 0;
+
+    if (!ComputeMinimumStreamableRegionSize(i64RegionWidth, i64RegionHeight))
+      return -1;
+
+    int64_t i64Width = 0, i64Height = 0;
+
+    openslide_get_level_dimensions(m_Osr, m_Level, &i64Width, &i64Height);
+
+    if (i64Width <= 0 || i64Height <= 0)
+      return -1;
+
+    // NOTE: The width and height are multiplies of region width and height
+    return (i64Width / i64RegionWidth) * (i64Height / i64RegionHeight);
+  }
+
 private:
-  openslide_t *m_Osr;
-  int32_t      m_Level;
-  std::string  m_AssociatedImage;
-  Rational     m_DownsampleX;
-  Rational     m_DownsampleY;
+  openslide_t         *m_Osr;
+  int32_t              m_Level;
+  std::string          m_AssociatedImage;
+  mutable Rational     m_DownsampleX;
+  mutable Rational     m_DownsampleY;
 
   // Compute rational downsample factors
   // Explanation:
@@ -424,7 +454,7 @@ private:
   //
   // In this implementation, ITK works with coordinates at the selected level. When L > 0, it becomes challenging
   // to pick coordinates x_0 that identify x_L exactly. We derive x_0 by upsampling as above. But several values of x_0 will map to x_L.
-  // We need to pick x_L so that it is invarient to an upsample and subsequent downsample. In math:
+  // We need to pick x_L so that it is invarient to an upsample and subsequent downsample. In math we want x_L so that:
   //
   // x_L = Downsample(Upsample(x_L)) = floor(floor(x_L * D) / D)
   //
@@ -440,7 +470,7 @@ private:
   // Which is what we wanted. Consequently, if dimensions are coprime, the image cannot technically be streamed.
   // In that case the ImageIORegion would reflect entire level L image. 
   // This wrapper also supports an approximate image (ignoring this issue).
-  bool ComputeDownsampleFactors() {
+  bool ComputeDownsampleFactors() const {
     if (m_Osr == NULL)
       return false;
 
