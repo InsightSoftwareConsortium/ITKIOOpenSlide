@@ -402,6 +402,8 @@ public:
   }
 
   bool ComputeMinimumStreamableRegionSize(int64_t &i64Width, int64_t &i64Height) const {
+    i64Width = i64Height = 0;
+
     if (!ComputeDownsampleFactors())
       return false;
 
@@ -428,11 +430,56 @@ public:
     return (i64Width / i64RegionWidth) * (i64Height / i64RegionHeight);
   }
 
+  bool AlignReadRegion(int64_t &i64X, int64_t &i64Y, int64_t &i64Width, int64_t &i64Height) const {
+    int64_t i64MinWidth = 0, i64MinHeight = 0;
+
+    if (!ComputeMinimumStreamableRegionSize(i64MinWidth, i64MinHeight))
+      return false;
+
+    // Adjust the read region to prefer the smaller permissible spacing
+    // Smaller spacing means smaller remainder and more flexibility
+    if (i64MinWidth < i64MinHeight) {
+      // Make i64Width larger if needed
+      if (i64Height > i64Width)
+        std::swap(i64Width, i64Height);
+    }
+    else if (i64MinHeight < i64MinWidth) {
+      // Make i64Height larger if needed
+      if (i64Width > i64Height)
+        std::swap(i64Width, i64Height);
+    }
+
+    int64_t i64XUpper = i64X + i64Width;
+    int64_t i64YUpper = i64Y + i64Height;
+
+    // Align X and Y to be on the grid with spacing MinWidth and MinHeight
+    int64_t r = (i64X % i64MinWidth);
+    i64X -= r;
+
+    r = (i64Y % i64MinHeight);
+    i64Y -= r;
+
+    // Align the upper coordinates (remove remainder and add one full spacing)
+    r = (i64XUpper % i64MinWidth);
+    if (r != 0)
+      i64XUpper += i64MinWidth - r;
+
+    r = (i64YUpper % i64MinHeight);
+    if (r != 0)
+      i64YUpper += i64MinHeight - r;
+
+    // Update width and height
+    i64Width = i64XUpper - i64X;
+    i64Height = i64YUpper - i64Y;
+
+    return true;
+  }
+
 private:
   openslide_t         *m_Osr;
   int32_t              m_Level;
   std::string          m_AssociatedImage;
-  mutable Rational     m_DownsampleX;
+  mutable Rational     m_DownsampleX; // Mutable for caching reasons
   mutable Rational     m_DownsampleY;
 
   // Compute rational downsample factors
