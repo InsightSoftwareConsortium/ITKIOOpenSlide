@@ -96,13 +96,13 @@ public:
   OpenSlideWrapper() {
     m_Osr = NULL;
     m_Level = 0;
-    m_ApproximateImage = false;
+    m_ApproximateStreaming = false;
   }
 
   OpenSlideWrapper(const char *p_cFileName) {
     m_Osr = NULL;
     m_Level = 0;
-    m_ApproximateImage = false;
+    m_ApproximateStreaming = false;
     Open(p_cFileName);
   }
 
@@ -112,13 +112,13 @@ public:
   }
 
   // Set whether streaming should be approximate or exact
-  void SetApproximateImage(bool bApproximateImage) {
-    m_ApproximateImage = bApproximateImage;
+  void SetApproximateStreaming(bool bApproximateStreaming) {
+    m_ApproximateStreaming = bApproximateStreaming;
   }
 
   // Determine whether streaming is exact or approximate
-  bool GetApproximateImage() const {
-    return m_ApproximateImage;
+  bool GetApproximateStreaming() const {
+    return m_ApproximateStreaming;
   }
 
   // Tells the ImageIO if the wrapper is in a state where stream reading can occur.
@@ -128,7 +128,7 @@ public:
       return false;
 
     // XXX: ITK streams along X. Shouldn't we check if the minimum spacing in Y is not the size of the whole image?
-    return m_ApproximateImage || ComputeMaximumNumberOfStreamableRegions() > 1;
+    return m_ApproximateStreaming || ComputeMaximumNumberOfStreamableRegions() > 1;
   }
 
   // Closes the currently opened file
@@ -446,7 +446,7 @@ public:
     if (m_Osr == NULL)
       return false;
 
-    if (m_Level == 0 || m_ApproximateImage) // Nothing to do
+    if (m_Level == 0 || m_ApproximateStreaming) // Nothing to do
       return true;
 
     int64_t i64MinWidth = 0, i64MinHeight = 0;
@@ -484,7 +484,7 @@ private:
   openslide_t *m_Osr;
   int32_t      m_Level;
   std::string  m_AssociatedImage;
-  bool         m_ApproximateImage;
+  bool         m_ApproximateStreaming;
 };
 
 OpenSlideImageIO::OpenSlideImageIO()
