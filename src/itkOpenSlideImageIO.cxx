@@ -442,6 +442,7 @@ public:
     return (i64ImageWidth + i64Width - 1)/i64Width * (i64ImageHeight + i64Height - 1)/i64Height;
   }
 
+  // Align X, Y and region dimensions to be on the grid of points invariant to upsample/downsample
   bool AlignReadRegion(int64_t &i64X, int64_t &i64Y, int64_t &i64Width, int64_t &i64Height) const {
     if (m_Osr == NULL)
       return false;
