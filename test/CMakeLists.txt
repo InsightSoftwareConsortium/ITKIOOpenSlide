@@ -36,9 +36,15 @@ itk_add_test(NAME itkOpenSlideTestDownsample
 )
 
 # Compress cannot be used here since stream writing will not be supported
-itk_add_test(NAME itkOpenSlideTestStreaming
+itk_add_test(NAME itkOpenSlideTestApproximateStreaming
   COMMAND ITKIOOpenSlideTestDriver
   --compare DATA{Input/CMU-1-level-1-stream-200.mha} ${ITK_TEST_OUTPUT_DIR}/CMU-1-level-1-stream-200.mha
-  itkOpenSlideImageIOTest DATA{Input/CMU-1.svs} ${ITK_TEST_OUTPUT_DIR}/CMU-1-level-1-stream-200.mha level=1 stream=200
+  itkOpenSlideImageIOTest DATA{Input/CMU-1.svs} ${ITK_TEST_OUTPUT_DIR}/CMU-1-level-1-stream-200.mha level=1 stream=200 approximateStreaming
+)
+
+itk_add_test(NAME itkOpenSlideTestStreaming
+  COMMAND ITKIOOpenSlideTestDriver
+  --compare DATA{Input/CMU-1-level-1.mha} ${ITK_TEST_OUTPUT_DIR}/CMU-1-level-1.mha
+  itkOpenSlideImageIOTest DATA{Input/CMU-1.svs} ${ITK_TEST_OUTPUT_DIR}/CMU-1-level-1.mha level=1 stream=200
 )
 

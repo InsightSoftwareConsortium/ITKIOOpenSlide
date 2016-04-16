@@ -136,6 +136,27 @@ public:
 /** Returns all associated image names stored in the file. */
   virtual AssociatedImageNameContainer GetAssociatedImageNames() const;
 
+/** Returns the absolute maximum number of streamable regions (tiles). */
+  virtual int64_t ComputeMaximumNumberOfStreamableRegions() const;
+
+/** Returns the maximum number of streamable regions similar (but >=) to the given region. */
+  virtual int64_t ComputeMaximumNumberOfStreamableRegions(const ImageIORegion &clRegion) const;
+
+/** Returns the minimum streamable region. */
+  virtual ImageIORegion GetMinimumStreamableRegion() const;
+
+/** Turn on/off approximate streaming. This only affects streaming level images other than level 0. 
+  * This gives the ImageIO more flexibility with the read regions allowing for more streaming divisons
+  * at the cost of image accuracy. This flexibility is already available for level 0 whether this is 
+  * enabled or not (and does not affect accuracy).
+  * Use this if streaming results in excessive memory usage when streaming level images other than
+  * level 0.
+  */
+  virtual void SetApproximateStreaming(bool bApproximateStreaming);
+
+/** Returns whether approximate streaming is enabled or not. */
+  virtual bool GetApproximateStreaming() const;
+
 protected:
   OpenSlideImageIO();
   ~OpenSlideImageIO();

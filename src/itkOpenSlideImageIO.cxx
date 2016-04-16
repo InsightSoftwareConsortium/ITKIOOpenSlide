@@ -364,7 +364,7 @@ public:
   //
   // In this implementation, ITK works with coordinates at the selected level. When L > 0, it becomes challenging
   // to pick coordinates x_0 that identify x_L exactly. We derive x_0 by upsampling as above. But several values of x_0 will map to x_L.
-  // We need to pick x_L so that it is invarient to an upsample and subsequent downsample. In math we want x_L so that:
+  // We need to pick x_L so that it is invariant to an upsample and subsequent downsample. In math we want x_L so that:
   //
   // x_L = Downsample(Upsample(x_L)) = floor(floor(x_L * D) / D)
   //
@@ -379,14 +379,14 @@ public:
   //
   // Which is what we wanted. Consequently, if dimensions are coprime, the image cannot technically be streamed.
   // In that case the ImageIORegion would reflect entire level L image. 
-  // This wrapper also supports an approximate image (ignoring this issue).
+  // This wrapper also supports approximate streaming (ignoring this issue).
   bool ComputeMinimumStreamableRegionSize(int64_t &i64Width, int64_t &i64Height) const {
     i64Width = i64Height = 0;
 
     if (m_Osr == NULL)
       return false;
 
-    if (m_Level == 0) { // Nothing to do
+    if (m_Level == 0 || m_ApproximateStreaming) { // Nothing to do
       i64Width = i64Height = 1;
       return true;
     }
@@ -806,6 +806,62 @@ OpenSlideImageIO::AssociatedImageNameContainer OpenSlideImageIO::GetAssociatedIm
     return AssociatedImageNameContainer();
 
   return m_OpenSlideWrapper->GetAssociatedImageNames();
+}
+
+/** Returns the absolute maximum number of streamable regions (tiles). */
+int64_t OpenSlideImageIO::ComputeMaximumNumberOfStreamableRegions() const {
+  if (m_OpenSlideWrapper == NULL)
+    return -1;
+
+  return m_OpenSlideWrapper->ComputeMaximumNumberOfStreamableRegions();
+}
+
+/** Returns the maximum number of streamable regions similar (but >=) to the given region. */
+int64_t OpenSlideImageIO::ComputeMaximumNumberOfStreamableRegions(const ImageIORegion &clRegion) const {
+  if (m_OpenSlideWrapper == NULL)
+    return -1;
+
+  ImageIORegion::IndexType clStart = clRegion.GetIndex();
+  ImageIORegion::SizeType clSize = clRegion.GetSize();
+
+  if (clStart.size() != 2 || clSize.size() != 2)
+    return -1;
+
+  return m_OpenSlideWrapper->ComputeMaximumNumberOfStreamableRegions(clStart[0], clStart[1], clSize[0], clSize[1]);
+}
+
+/** Returns the minimum streamable region. */
+ImageIORegion OpenSlideImageIO::GetMinimumStreamableRegion() const {
+  if (m_OpenSlideWrapper == NULL)
+    return ImageIORegion();
+
+  ImageIORegion clRegion;
+  ImageIORegion::SizeType clSize(2);
+  ImageIORegion::IndexType clIndex(2, 0);
+
+  int64_t i64Width = 0, i64Height = 0;
+  if (!m_OpenSlideWrapper->ComputeMinimumStreamableRegionSize(i64Width, i64Height))
+    return ImageIORegion();
+
+  // XXX: Could overflow
+  clSize[0] = (SizeValueType)i64Width;
+  clSize[1] = (SizeValueType)i64Height;
+
+  clRegion.SetIndex(clIndex);
+  clRegion.SetSize(clSize);
+
+  return clRegion;
+}
+
+/** Turn on/off approximate streaming. This only affects streaming level images other than level 0. */
+void OpenSlideImageIO::SetApproximateStreaming(bool bApproximateStreaming) {
+  if (m_OpenSlideWrapper != NULL)
+    m_OpenSlideWrapper->SetApproximateStreaming(bApproximateStreaming);
+}
+
+/** Returns weather approximate streaming is enabled or not. */
+bool OpenSlideImageIO::GetApproximateStreaming() const {
+  return m_OpenSlideWrapper != NULL && m_OpenSlideWrapper->GetApproximateStreaming();
 }
 
 } // end namespace itk
