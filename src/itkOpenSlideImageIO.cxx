@@ -51,6 +51,12 @@ public:
     if (ui64B == 0)
       return ui64A;
 
+    if (ui64A == 1 || ui64B == 1)
+      return 1;
+
+    if (ui64A == ui64B)
+      return ui64A;
+
     unsigned int uiExp = 0;
     while ((ui64A & 1) == 0 && (ui64B & 1) == 0) {
       ui64A >>= 1;
@@ -159,11 +165,13 @@ public:
   OpenSlideWrapper() {
     m_Osr = NULL;
     m_Level = 0;
+    m_ApproximateImage = false;
   }
 
   OpenSlideWrapper(const char *p_cFileName) {
     m_Osr = NULL;
     m_Level = 0;
+    m_ApproximateImage = false;
     Open(p_cFileName);
   }
 
@@ -172,13 +180,24 @@ public:
     Close();
   }
 
+  // Set whether streaming should be approximate or exact
+  void SetApproximateImage(bool bApproximateImage) {
+    m_ApproximateImage = bApproximateImage;
+  }
+
+  // Determine whether streaming is exact or approximate
+  bool GetApproximateImage() const {
+    return m_ApproximateImage;
+  }
+
   // Tells the ImageIO if the wrapper is in a state where stream reading can occur.
   // While OpenSlide supports reading regions of level images, it does not for associated images.
   bool CanStreamRead() const {
     if (m_AssociatedImage.size() > 0)
       return false;
 
-    return ComputeMaximumNumberOfStreamableRegions() > 1;
+    // XXX: ITK streams along X. Shouldn't we check if the minimum spacing in Y is not the size of the whole image?
+    return m_ApproximateImage || ComputeMaximumNumberOfStreamableRegions() > 1;
   }
 
   // Closes the currently opened file
@@ -401,6 +420,7 @@ public:
     return true;
   }
 
+  // Compute the minimum streamable region size
   bool ComputeMinimumStreamableRegionSize(int64_t &i64Width, int64_t &i64Height) const {
     i64Width = i64Height = 0;
 
@@ -413,6 +433,7 @@ public:
     return true;
   }
 
+  // Compute absolute maximum number of streamable regions
   int64_t ComputeMaximumNumberOfStreamableRegions() const {
     int64_t i64RegionWidth = 0, i64RegionHeight = 0;
 
@@ -430,47 +451,35 @@ public:
     return (i64Width / i64RegionWidth) * (i64Height / i64RegionHeight);
   }
 
+  // After alignment, what's the maximum number of streamable regions of this size?
+  int64_t ComputeMaximumNumberOfStreamableRegions(int64_t i64X, int64_t i64Y, int64_t i64Width, int64_t i64Height) const {
+    if (m_Osr == NULL)
+      return -1;
+
+    int64_t i64ImageWidth = 0, i64ImageHeight = 0;
+
+    openslide_get_level_dimensions(m_Osr, m_Level, &i64ImageWidth, &i64ImageHeight);
+
+    if (i64ImageWidth <= 0 || i64ImageHeight <= 0)
+      return -1;
+
+    if (!AlignReadRegion(i64X, i64Y, i64Width, i64Height))
+      return -1;
+
+    return (i64ImageWidth + i64Width - 1)/i64Width * (i64ImageHeight + i64Height - 1)/i64Height;
+  }
+
   bool AlignReadRegion(int64_t &i64X, int64_t &i64Y, int64_t &i64Width, int64_t &i64Height) const {
     if (m_Osr == NULL)
       return false;
 
-    if (m_Level == 0) // Nothing to do
+    if (m_Level == 0 || m_ApproximateImage) // Nothing to do
       return true;
-
-    int64_t i64ImageWidth = 0, i64ImageHeight = 0;
-    openslide_get_level_dimensions(m_Osr, m_Level, &i64ImageWidth, &i64ImageHeight);
-
-    if (i64ImageWidth <= 0 || i64ImageHeight <= 0)
-      return false;
 
     int64_t i64MinWidth = 0, i64MinHeight = 0;
 
     if (!ComputeMinimumStreamableRegionSize(i64MinWidth, i64MinHeight))
       return false;
-
-    const int64_t i64Area = i64Width * i64Height;
-
-    // Adjust the read region to give smaller dimensions to smaller spacing dimensions
-    if (i64MinWidth < i64MinHeight) {
-      // Make i64Width smaller if needed
-      if (i64Width > i64Height)
-        std::swap(i64Width, i64Height);
-    }
-    else if (i64MinHeight < i64MinWidth) {
-      // Make i64Height smaller if needed
-      if (i64Height > i64Width)
-        std::swap(i64Width, i64Height);
-    }
-
-    if (i64Width > i64ImageWidth) {
-      i64Width = i64ImageWidth;
-      i64Height = std::min(i64ImageHeight, (i64Area + i64Width - 1) / i64Width);
-    }
-
-    if (i64Height > i64ImageHeight) {
-      i64Height = i64ImageHeight;
-      i64Width = std::min(i64ImageWidth, (i64Area + i64Height - 1) / i64Height);
-    }
 
     int64_t i64XUpper = i64X + i64Width;
     int64_t i64YUpper = i64Y + i64Height;
@@ -502,6 +511,7 @@ private:
   openslide_t         *m_Osr;
   int32_t              m_Level;
   std::string          m_AssociatedImage;
+  bool                 m_ApproximateImage;
   mutable Rational     m_DownsampleX; // Mutable for caching reasons
   mutable Rational     m_DownsampleY;
 
@@ -551,6 +561,12 @@ private:
     // Downsample factors already computed?
     if (m_DownsampleX != 0 && m_DownsampleY != 0)
       return true;
+
+    if (m_Level == 0) {
+      m_DownsampleX = 1;
+      m_DownsampleY = 1;
+      return true;
+    }
 
     int64_t i64WidthLevel0 = 0, i64HeightLevel0 = 0;
     int64_t i64WidthLevelL = 0, i64HeightLevelL = 0;
