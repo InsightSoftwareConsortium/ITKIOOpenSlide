@@ -431,22 +431,45 @@ public:
   }
 
   bool AlignReadRegion(int64_t &i64X, int64_t &i64Y, int64_t &i64Width, int64_t &i64Height) const {
+    if (m_Osr == NULL)
+      return false;
+
+    if (m_Level == 0) // Nothing to do
+      return true;
+
+    int64_t i64ImageWidth = 0, i64ImageHeight = 0;
+    openslide_get_level_dimensions(m_Osr, m_Level, &i64ImageWidth, &i64ImageHeight);
+
+    if (i64ImageWidth <= 0 || i64ImageHeight <= 0)
+      return false;
+
     int64_t i64MinWidth = 0, i64MinHeight = 0;
 
     if (!ComputeMinimumStreamableRegionSize(i64MinWidth, i64MinHeight))
       return false;
 
-    // Adjust the read region to prefer the smaller permissible spacing
-    // Smaller spacing means smaller remainder and more flexibility
+    const int64_t i64Area = i64Width * i64Height;
+
+    // Adjust the read region to give smaller dimensions to smaller spacing dimensions
     if (i64MinWidth < i64MinHeight) {
-      // Make i64Width larger if needed
-      if (i64Height > i64Width)
+      // Make i64Width smaller if needed
+      if (i64Width > i64Height)
         std::swap(i64Width, i64Height);
     }
     else if (i64MinHeight < i64MinWidth) {
-      // Make i64Height larger if needed
-      if (i64Width > i64Height)
+      // Make i64Height smaller if needed
+      if (i64Height > i64Width)
         std::swap(i64Width, i64Height);
+    }
+
+    if (i64Width > i64ImageWidth) {
+      i64Width = i64ImageWidth;
+      i64Height = std::min(i64ImageHeight, (i64Area + i64Width - 1) / i64Width);
+    }
+
+    if (i64Height > i64ImageHeight) {
+      i64Height = i64ImageHeight;
+      i64Width = std::min(i64ImageWidth, (i64Area + i64Height - 1) / i64Height);
     }
 
     int64_t i64XUpper = i64X + i64Width;
