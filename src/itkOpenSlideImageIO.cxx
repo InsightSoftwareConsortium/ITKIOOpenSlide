@@ -17,6 +17,7 @@
  *=========================================================================*/
 
 #include <cctype>
+#include <algorithm>
 #include <sstream>
 
 #include "itkIOCommon.h"
@@ -36,6 +37,46 @@ namespace itk
 // It also allows for seamless access to various levels and associated images through one set of functions (as opposed to two)
 class OpenSlideWrapper {
 public:
+
+  // GCD Algorithm from wikipedia pseudo code: 
+  // https://en.wikipedia.org/wiki/Greatest_common_divisor#Binary_method
+  // 
+  // NOTE: While vnl_rational can do this too, vnl_rational is defined for long integers (32 bit integers on amd64).
+  //       Slides can be extremely large. It would ideal to work with 64 bit integers.
+  static uint64_t GCD(uint64_t ui64A, uint64_t ui64B) {
+    if (ui64A == 0)
+      return ui64B;
+
+    if (ui64B == 0)
+      return ui64A;
+
+    if (ui64A == 1 || ui64B == 1)
+      return 1;
+
+    if (ui64A == ui64B)
+      return ui64A;
+
+    unsigned int uiExp = 0;
+    while ((ui64A & 1) == 0 && (ui64B & 1) == 0) {
+      ui64A >>= 1;
+      ui64B >>= 1;
+      ++uiExp;
+    }
+
+    while (ui64A != ui64B) {
+      if ((ui64A & 1) == 0)
+        ui64A >>= 1;
+      else if ((ui64B & 1) == 0)
+        ui64B >>= 1;
+      else if (ui64A > ui64B)
+        ui64A = (ui64A - ui64B) >> 1;
+      else
+        ui64B = (ui64B - ui64A) >> 1;
+    }
+
+    return ui64A << uiExp;
+  }
+
   // Detects the vendor. Should return NULL if the file is not readable.
   static const char * DetectVendor(const char *p_cFileName) {
     return openslide_detect_vendor(p_cFileName);
@@ -55,11 +96,13 @@ public:
   OpenSlideWrapper() {
     m_Osr = NULL;
     m_Level = 0;
+    m_ApproximateStreaming = false;
   }
 
   OpenSlideWrapper(const char *p_cFileName) {
     m_Osr = NULL;
     m_Level = 0;
+    m_ApproximateStreaming = false;
     Open(p_cFileName);
   }
 
@@ -68,10 +111,24 @@ public:
     Close();
   }
 
+  // Set whether streaming should be approximate or exact
+  void SetApproximateStreaming(bool bApproximateStreaming) {
+    m_ApproximateStreaming = bApproximateStreaming;
+  }
+
+  // Determine whether streaming is exact or approximate
+  bool GetApproximateStreaming() const {
+    return m_ApproximateStreaming;
+  }
+
   // Tells the ImageIO if the wrapper is in a state where stream reading can occur.
   // While OpenSlide supports reading regions of level images, it does not for associated images.
   bool CanStreamRead() const {
-    return m_AssociatedImage.empty();
+    if (m_AssociatedImage.size() > 0)
+      return false;
+
+    // XXX: ITK streams along X. Shouldn't we check if the minimum spacing in Y is not the size of the whole image?
+    return m_ApproximateStreaming || ComputeMaximumNumberOfStreamableRegions() > 1;
   }
 
   // Closes the currently opened file
@@ -288,10 +345,147 @@ public:
     return true;
   }
 
+  // Compute the minimum streamable region size
+  // Explanation:
+  // OpenSlide expects level 0 coordinates in openslide_read_region(). This is OK if we're reading level 0 images.
+  // However, if we're reading level L images with L > 0, this becomes problematic. This can be seen with a little math.
+  // First, note the equation relating level 0 and level L coordinates:
+  //
+  // x_0 = D * x_L
+  //
+  // Here D is the downsample factor and is a real number (openslide_get_level_downsample() returns double).
+  // From OpenSlide's source code, OpenSlide downsamples x_0 to x_L with a floor operation:
+  //
+  // x_L = floor(x_0 / D)
+  //
+  // Likewise, OpenSlide upsamples x_0 with a floor operation
+  //
+  // x_0 = floor(x_L * D)
+  //
+  // In this implementation, ITK works with coordinates at the selected level. When L > 0, it becomes challenging
+  // to pick coordinates x_0 that identify x_L exactly. We derive x_0 by upsampling as above. But several values of x_0 will map to x_L.
+  // We need to pick x_L so that it is invariant to an upsample and subsequent downsample. In math we want x_L so that:
+  //
+  // x_L = Downsample(Upsample(x_L)) = floor(floor(x_L * D) / D)
+  //
+  // D is known to be a rational number A/B since it is computed by dividing the dimensions of level 0 and level L images.
+  // If A/B is a reduced fraction, we would like to determine x_L so that it is divisible by B. When B divides x_L we have the identity:
+  //
+  // Upsample(x_L) = D * x_L
+  //
+  // A subsequent downsample gives:
+  //
+  // Downsample(D * x_L) = x_L
+  //
+  // Which is what we wanted. Consequently, if dimensions are coprime, the image cannot technically be streamed.
+  // In that case the ImageIORegion would reflect entire level L image. 
+  // This wrapper also supports approximate streaming (ignoring this issue).
+  bool ComputeMinimumStreamableRegionSize(int64_t &i64Width, int64_t &i64Height) const {
+    i64Width = i64Height = 0;
+
+    if (m_Osr == NULL)
+      return false;
+
+    if (m_Level == 0 || m_ApproximateStreaming) { // Nothing to do
+      i64Width = i64Height = 1;
+      return true;
+    }
+
+    int64_t i64WidthLevel0 = 0, i64HeightLevel0 = 0;
+    int64_t i64WidthLevelL = 0, i64HeightLevelL = 0;
+
+    openslide_get_level0_dimensions(m_Osr, &i64WidthLevel0, &i64HeightLevel0);
+    openslide_get_level_dimensions(m_Osr, m_Level, &i64WidthLevelL, &i64HeightLevelL);
+
+    if (i64WidthLevel0 <= 0 || i64HeightLevel0 <= 0 || i64WidthLevelL <= 0 || i64HeightLevelL <= 0)
+      return false;
+
+    i64Width = i64WidthLevelL / (int64_t)GCD(i64WidthLevel0, i64WidthLevelL);
+    i64Height = i64HeightLevelL / (int64_t)GCD(i64HeightLevel0, i64HeightLevelL);
+
+    return true;
+  }
+
+  // Compute absolute maximum number of streamable regions
+  int64_t ComputeMaximumNumberOfStreamableRegions() const {
+    int64_t i64RegionWidth = 0, i64RegionHeight = 0;
+
+    if (!ComputeMinimumStreamableRegionSize(i64RegionWidth, i64RegionHeight))
+      return -1;
+
+    int64_t i64Width = 0, i64Height = 0;
+
+    openslide_get_level_dimensions(m_Osr, m_Level, &i64Width, &i64Height);
+
+    if (i64Width <= 0 || i64Height <= 0)
+      return -1;
+
+    // NOTE: The width and height are multiplies of region width and height
+    return (i64Width / i64RegionWidth) * (i64Height / i64RegionHeight);
+  }
+
+  // After alignment, what's the maximum number of streamable regions of this size?
+  int64_t ComputeMaximumNumberOfStreamableRegions(int64_t i64X, int64_t i64Y, int64_t i64Width, int64_t i64Height) const {
+    if (m_Osr == NULL)
+      return -1;
+
+    int64_t i64ImageWidth = 0, i64ImageHeight = 0;
+
+    openslide_get_level_dimensions(m_Osr, m_Level, &i64ImageWidth, &i64ImageHeight);
+
+    if (i64ImageWidth <= 0 || i64ImageHeight <= 0)
+      return -1;
+
+    if (!AlignReadRegion(i64X, i64Y, i64Width, i64Height))
+      return -1;
+
+    return (i64ImageWidth + i64Width - 1)/i64Width * (i64ImageHeight + i64Height - 1)/i64Height;
+  }
+
+  // Align X, Y and region dimensions to be on the grid of points invariant to upsample/downsample
+  bool AlignReadRegion(int64_t &i64X, int64_t &i64Y, int64_t &i64Width, int64_t &i64Height) const {
+    if (m_Osr == NULL)
+      return false;
+
+    if (m_Level == 0 || m_ApproximateStreaming) // Nothing to do
+      return true;
+
+    int64_t i64MinWidth = 0, i64MinHeight = 0;
+
+    if (!ComputeMinimumStreamableRegionSize(i64MinWidth, i64MinHeight))
+      return false;
+
+    int64_t i64XUpper = i64X + i64Width;
+    int64_t i64YUpper = i64Y + i64Height;
+
+    // Align X and Y to be on the grid with spacing MinWidth and MinHeight
+    int64_t r = (i64X % i64MinWidth);
+    i64X -= r;
+
+    r = (i64Y % i64MinHeight);
+    i64Y -= r;
+
+    // Align the upper coordinates (remove remainder and add one full spacing)
+    r = (i64XUpper % i64MinWidth);
+    if (r != 0)
+      i64XUpper += i64MinWidth - r;
+
+    r = (i64YUpper % i64MinHeight);
+    if (r != 0)
+      i64YUpper += i64MinHeight - r;
+
+    // Update width and height
+    i64Width = i64XUpper - i64X;
+    i64Height = i64YUpper - i64Y;
+
+    return true;
+  }
+
 private:
   openslide_t *m_Osr;
   int32_t      m_Level;
   std::string  m_AssociatedImage;
+  bool         m_ApproximateStreaming;
 };
 
 OpenSlideImageIO::OpenSlideImageIO()
@@ -512,7 +706,33 @@ OpenSlideImageIO::Write( const void* /*buffer*/) {
 RequestedRegion */
 ImageIORegion
 OpenSlideImageIO::GenerateStreamableReadRegionFromRequestedRegion( const ImageIORegion & requested ) const {
-  return requested;
+  if (m_OpenSlideWrapper == NULL)
+    return requested;
+
+  ImageIORegion::SizeType clSize = requested.GetSize();
+  ImageIORegion::IndexType clStart = requested.GetIndex();
+
+  int64_t i64X = clStart[0];
+  int64_t i64Y = clStart[1];
+
+  int64_t i64Width = clSize[0];
+  int64_t i64Height = clSize[1];
+
+  if (!m_OpenSlideWrapper->AlignReadRegion(i64X, i64Y, i64Width, i64Height))
+    return requested;
+
+  clStart[0] = (SizeValueType)i64X;
+  clStart[1] = (SizeValueType)i64Y;
+
+  clSize[0] = (SizeValueType)i64Width;
+  clSize[1] = (SizeValueType)i64Height;
+
+  ImageIORegion clNewRegion(requested);
+
+  clNewRegion.SetSize(clSize);
+  clNewRegion.SetIndex(clStart);
+
+  return clNewRegion;
 }
 
 /** Get underlying OpenSlide library version */
@@ -587,6 +807,62 @@ OpenSlideImageIO::AssociatedImageNameContainer OpenSlideImageIO::GetAssociatedIm
     return AssociatedImageNameContainer();
 
   return m_OpenSlideWrapper->GetAssociatedImageNames();
+}
+
+/** Returns the absolute maximum number of streamable regions (tiles). */
+int64_t OpenSlideImageIO::ComputeMaximumNumberOfStreamableRegions() const {
+  if (m_OpenSlideWrapper == NULL)
+    return -1;
+
+  return m_OpenSlideWrapper->ComputeMaximumNumberOfStreamableRegions();
+}
+
+/** Returns the maximum number of streamable regions similar (but >=) to the given region. */
+int64_t OpenSlideImageIO::ComputeMaximumNumberOfStreamableRegions(const ImageIORegion &clRegion) const {
+  if (m_OpenSlideWrapper == NULL)
+    return -1;
+
+  ImageIORegion::IndexType clStart = clRegion.GetIndex();
+  ImageIORegion::SizeType clSize = clRegion.GetSize();
+
+  if (clStart.size() != 2 || clSize.size() != 2)
+    return -1;
+
+  return m_OpenSlideWrapper->ComputeMaximumNumberOfStreamableRegions(clStart[0], clStart[1], clSize[0], clSize[1]);
+}
+
+/** Returns the minimum streamable region. */
+ImageIORegion OpenSlideImageIO::GetMinimumStreamableRegion() const {
+  if (m_OpenSlideWrapper == NULL)
+    return ImageIORegion();
+
+  ImageIORegion clRegion;
+  ImageIORegion::SizeType clSize(2);
+  ImageIORegion::IndexType clIndex(2, 0);
+
+  int64_t i64Width = 0, i64Height = 0;
+  if (!m_OpenSlideWrapper->ComputeMinimumStreamableRegionSize(i64Width, i64Height))
+    return ImageIORegion();
+
+  // XXX: Could overflow
+  clSize[0] = (SizeValueType)i64Width;
+  clSize[1] = (SizeValueType)i64Height;
+
+  clRegion.SetIndex(clIndex);
+  clRegion.SetSize(clSize);
+
+  return clRegion;
+}
+
+/** Turn on/off approximate streaming. This only affects streaming level images other than level 0. */
+void OpenSlideImageIO::SetApproximateStreaming(bool bApproximateStreaming) {
+  if (m_OpenSlideWrapper != NULL)
+    m_OpenSlideWrapper->SetApproximateStreaming(bApproximateStreaming);
+}
+
+/** Returns weather approximate streaming is enabled or not. */
+bool OpenSlideImageIO::GetApproximateStreaming() const {
+  return m_OpenSlideWrapper != NULL && m_OpenSlideWrapper->GetApproximateStreaming();
 }
 
 } // end namespace itk
