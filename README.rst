@@ -1,5 +1,5 @@
 =====================
-ITKOpenSlideIO
+ITKIOOpenSlide
 =====================
 
 .. image:: https://circleci.com/gh/InsightSoftwareConsortium/ITKIOOpenSlide.svg?style=svg

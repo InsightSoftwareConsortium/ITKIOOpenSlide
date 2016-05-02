@@ -19,6 +19,7 @@
 #define itkOpenSlideImageIO_h
 
 #include "itkImageIOBase.h"
+#include "IOOpenSlideExport.h"
 
 namespace itk
 {
@@ -46,9 +47,9 @@ class OpenSlideWrapper;
  *
  *  \ingroup IOFilters
  *
- *  \ingroup ITKIOOpenSlide
+ *  \ingroup IOOpenSlide
  */
-class ITK_EXPORT OpenSlideImageIO : public ImageIOBase
+class IOOpenSlide_EXPORT OpenSlideImageIO : public ImageIOBase
 {
 public:
   /** Standard class typedefs. */
