@@ -46,7 +46,7 @@ class OpenSlideWrapper;
  *
  *  \ingroup IOFilters
  *
- *  \ingroup ITKIOOpenSlide
+ *  \ingroup IOOpenSlide
  */
 class ITK_EXPORT OpenSlideImageIO : public ImageIOBase
 {

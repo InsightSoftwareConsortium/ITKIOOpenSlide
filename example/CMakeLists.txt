@@ -7,7 +7,7 @@ find_package(ITK REQUIRED
     ITKCommon
     ITKIOImageBase
     ITKIOTIFF
-    ITKIOOpenSlide
+    IOOpenSlide
     ITKIOJPEG
     ITKIOPNG
   )
