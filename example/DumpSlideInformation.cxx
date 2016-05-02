@@ -312,10 +312,10 @@ DumpSlideInformation
 
   ReaderType::Pointer clReader = ReaderType::New();
 
-  const std::string strInputFileName = m_CLReaderIO->GetFileName();
+  const std::string inputFileName = m_CLReaderIO->GetFileName();
 
   clReader->SetImageIO(m_CLReaderIO);
-  clReader->SetFileName(strInputFileName);
+  clReader->SetFileName(inputFileName);
 
   WriterType::Pointer clWriter = WriterType::New();
   clWriter->SetInput(clReader->GetOutput());
