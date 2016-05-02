@@ -15,5 +15,5 @@ include(${ITK_USE_FILE})
 
 add_definitions(-D_USE_MATH_DEFINES=1)
 
-add_executable(DumpSlideInformation DumpSlideInformation.cpp)
+add_executable(DumpSlideInformation DumpSlideInformation.cxx)
 target_link_libraries(DumpSlideInformation ${ITK_LIBRARIES})
