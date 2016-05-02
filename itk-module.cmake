@@ -7,6 +7,8 @@ itk_module( IOOpenSlide
     ITKIOImageBase
   TEST_DEPENDS
     ITKTestKernel
+  ENABLE_SHARED
   DESCRIPTION
     "${DOCUMENTATION}"
+  EXCLUDE_FROM_DEFAULT
 )

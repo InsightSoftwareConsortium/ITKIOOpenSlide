@@ -20,6 +20,7 @@
 
 #include "itkObjectFactoryBase.h"
 #include "itkImageIOBase.h"
+#include "IOOpenSlideExport.h"
 
 namespace itk
 {
@@ -31,7 +32,7 @@ namespace itk
  * \ingroup IOOpenSlide
  *
  */
-class ITK_EXPORT OpenSlideImageIOFactory : public ObjectFactoryBase
+class IOOpenSlide_EXPORT OpenSlideImageIOFactory : public ObjectFactoryBase
 {
 public:
   /** Standard class typedefs. */

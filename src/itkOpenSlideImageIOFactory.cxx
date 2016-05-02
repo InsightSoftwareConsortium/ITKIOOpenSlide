@@ -19,6 +19,7 @@
 #include "itkCreateObjectFunction.h"
 #include "itkOpenSlideImageIO.h"
 #include "itkVersion.h"
+#include "IOOpenSlideExport.h"
 
 namespace itk
 {
@@ -45,6 +46,20 @@ const char*
 OpenSlideImageIOFactory::GetDescription() const
 {
   return "OpenSlide ImageIO Factory, allows the loading of OpenSlide images into insight";
+}
+
+// Undocumented API used to register during static initialization.
+// DO NOT CALL DIRECTLY.
+
+static bool OpenSlideImageIOFactoryHasBeenRegistered;
+
+void IOOpenSlide_EXPORT OpenSlideImageIOFactoryRegister__Private(void)
+{
+  if( ! OpenSlideImageIOFactoryHasBeenRegistered )
+    {
+    OpenSlideImageIOFactoryHasBeenRegistered = true;
+    OpenSlideImageIOFactory::RegisterOneFactory();
+    }
 }
 
 } // end namespace itk
