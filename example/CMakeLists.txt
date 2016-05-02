@@ -3,11 +3,6 @@ cmake_minimum_required(VERSION 2.8)
 project(DumpSlideInformation CXX)
 
 find_package(ITK REQUIRED ITKCommon ITKIOImageBase ITKIOTIFF ITKIOOpenSlide ITKIOJPEG ITKIOPNG)
-
-if (NOT ITK_FOUND)
-  message(FATAL_ERROR "ITK is required.")
-endif()
-
 include(${ITK_USE_FILE})
 
 add_definitions(-D_USE_MATH_DEFINES=1)
