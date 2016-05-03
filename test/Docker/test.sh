@@ -23,5 +23,5 @@ cmake \
   -G Ninja \
   -DITK_DIR:PATH=/usr/src/ITK-build \
   -DCMAKE_BUILD_TYPE:STRING=Release \
-    /usr/src/ITKOpenSlideIO/example/
+    /usr/src/ITKOpenSlideIO/examples/
 ninja
