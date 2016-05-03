@@ -1,0 +1,2 @@
+itk_wrap_simple_class("itk::OpenSlideImageIO" POINTER)
+itk_wrap_simple_class("itk::OpenSlideImageIOFactory" POINTER)
