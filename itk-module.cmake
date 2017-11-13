@@ -8,6 +8,8 @@ itk_module( IOOpenSlide
   TEST_DEPENDS
     ITKTestKernel
   ENABLE_SHARED
+  FACTORY_NAMES
+    ImageIO::OpenSlide
   DESCRIPTION
     "${DOCUMENTATION}"
   EXCLUDE_FROM_DEFAULT
