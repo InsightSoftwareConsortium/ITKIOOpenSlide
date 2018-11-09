@@ -52,6 +52,8 @@ class OpenSlideWrapper;
 class IOOpenSlide_EXPORT OpenSlideImageIO : public ImageIOBase
 {
 public:
+  ITK_DISALLOW_COPY_AND_ASSIGN(OpenSlideImageIO);
+
   /** Standard class typedefs. */
   typedef OpenSlideImageIO         Self;
   typedef ImageIOBase              Superclass;
@@ -164,8 +166,6 @@ protected:
   virtual void PrintSelf(std::ostream& os, Indent indent) const;
 
 private:
-  OpenSlideImageIO(const Self&); //purposely not implemented
-  void operator=(const Self&); //purposely not implemented
 
   OpenSlideWrapper *m_OpenSlideWrapper; // Opaque pointer to a wrapper that manages openslide_t
 };
