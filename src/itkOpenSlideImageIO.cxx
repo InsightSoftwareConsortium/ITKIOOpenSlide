@@ -490,7 +490,7 @@ private:
 
 OpenSlideImageIO::OpenSlideImageIO()
 {
-  typedef RGBAPixel<unsigned char> PixelType;
+  using PixelType = RGBAPixel<unsigned char>;
   PixelType clPixel;
 
   m_OpenSlideWrapper = NULL;
@@ -564,7 +564,7 @@ bool OpenSlideImageIO::CanStreamRead() {
 }
 
 void OpenSlideImageIO::ReadImageInformation() {
-  typedef RGBAPixel<unsigned char> PixelType;
+  using PixelType = RGBAPixel<unsigned char>;
   PixelType clPixel;
 
   this->SetNumberOfDimensions(2);

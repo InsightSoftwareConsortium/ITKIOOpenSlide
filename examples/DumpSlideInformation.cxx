@@ -20,9 +20,9 @@ void Usage(const char *cArg0)
 class DumpSlideInformation
 {
 public:
-  typedef itk::RGBAPixel<unsigned char> PixelType;
-  typedef itk::Image<PixelType, 2>      ImageType;
-  typedef itk::OpenSlideImageIO         ReaderIOType;
+  using PixelType = itk::RGBAPixel<unsigned char>;
+  using ImageType = itk::Image<PixelType, 2>;
+  using ReaderIOType = itk::OpenSlideImageIO;
 
   DumpSlideInformation()
   {
@@ -307,8 +307,8 @@ bool
 DumpSlideInformation
 ::WriteImage(const char *fileName) const
 {
-  typedef itk::ImageFileReader<ImageType> ReaderType;
-  typedef itk::ImageFileWriter<ImageType> WriterType;
+  using ReaderType = itk::ImageFileReader<ImageType>;
+  using WriterType = itk::ImageFileWriter<ImageType>;
 
   ReaderType::Pointer clReader = ReaderType::New();
 

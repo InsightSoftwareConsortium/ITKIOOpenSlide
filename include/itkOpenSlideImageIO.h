@@ -54,11 +54,11 @@ class IOOpenSlide_EXPORT OpenSlideImageIO : public ImageIOBase
 public:
   ITK_DISALLOW_COPY_AND_ASSIGN(OpenSlideImageIO);
 
-  /** Standard class typedefs. */
-  typedef OpenSlideImageIO         Self;
-  typedef ImageIOBase              Superclass;
-  typedef SmartPointer<Self>       Pointer;
-  typedef std::vector<std::string> AssociatedImageNameContainer;
+  /** Standard class type alias. */
+  using Self = OpenSlideImageIO;
+  using Superclass = ImageIOBase;
+  using Pointer = SmartPointer<Self>;
+  using AssociatedImageNameContainer = std::vector<std::string>;
 
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
@@ -66,7 +66,7 @@ public:
   /** Run-time type information (and related methods). */
   itkTypeMacro(OpenSlideImageIO, ImageIOBase);
 
-  typedef Superclass::ArrayOfExtensionsType ArrayOfExtensionsType;
+  using ArrayOfExtensionsType = Superclass::ArrayOfExtensionsType;
 
  /*-------- This part of the interfaces deals with reading data. ----- */
 

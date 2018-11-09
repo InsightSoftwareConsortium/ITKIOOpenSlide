@@ -76,11 +76,11 @@ bool ReadFileStripCR(const char *p_cFileName, std::vector<char> &vBuffer) {
 } // End anonymous namespace
 
 int itkOpenSlideTestMetaData( int argc, char * argv[] ) {
-  typedef itk::OpenSlideImageIO         ImageIOType;
-  typedef itk::RGBAPixel<unsigned char> PixelType;
-  typedef itk::Image<PixelType, 2>      ImageType;
-  typedef ImageType::SizeType           SizeType;
-  typedef ImageType::SpacingType        SpacingType;
+  using ImageIOType = itk::OpenSlideImageIO;
+  using PixelType = itk::RGBAPixel<unsigned char>;
+  using ImageType = itk::Image<PixelType, 2>;
+  using SizeType = ImageType::SizeType;
+  using SpacingType = ImageType::SpacingType;
 
   if (argc < 2 || argc > 4) {
     std::cerr << "Usage: " << argv[0] << " slideFile [outputLog] [comparisonLog]" << std::endl;
