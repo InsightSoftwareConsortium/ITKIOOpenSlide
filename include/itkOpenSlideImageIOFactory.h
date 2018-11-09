@@ -35,6 +35,8 @@ namespace itk
 class IOOpenSlide_EXPORT OpenSlideImageIOFactory : public ObjectFactoryBase
 {
 public:
+  ITK_DISALLOW_COPY_AND_ASSIGN(OpenSlideImageIOFactory);
+
   /** Standard class typedefs. */
   typedef OpenSlideImageIOFactory  Self;
   typedef ObjectFactoryBase        Superclass;
@@ -62,11 +64,6 @@ public:
 protected:
   OpenSlideImageIOFactory();
   ~OpenSlideImageIOFactory();
-
-private:
-  OpenSlideImageIOFactory(const Self&); //purposely not implemented
-  void operator=(const Self&); //purposely not implemented
-
 };
 
 } // end namespace itk
