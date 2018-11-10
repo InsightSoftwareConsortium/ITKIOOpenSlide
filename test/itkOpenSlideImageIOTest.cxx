@@ -60,11 +60,11 @@ bool ParseValue(const char *p_cValue, std::string &strCommand, std::string &strV
 #if 0
 // For generating data for tests (particularly the streaming one)
 bool CompressImageFile(const char *p_cFileName) {
-  typedef itk::RGBAPixel<unsigned char> PixelType;
-  typedef itk::Image<PixelType, 2>      ImageType;
+  using PixelType = itk::RGBAPixel<unsigned char>;
+  using ImageType = itk::Image<PixelType, 2>;
 
-  typedef itk::ImageFileReader<ImageType> ReaderType;
-  typedef itk::ImageFileWriter<ImageType> WriterType;
+  using ReaderType = itk::ImageFileReader<ImageType>;
+  using WriterType = itk::ImageFileWriter<ImageType>;
 
   ReaderType::Pointer p_clReader = ReaderType::New();
   WriterType::Pointer p_clWriter = WriterType::New();
@@ -89,11 +89,11 @@ bool CompressImageFile(const char *p_cFileName) {
 } // End anonymous namespace
 
 int itkOpenSlideImageIOTest( int argc, char * argv[] ) {
-  typedef itk::RGBAPixel<unsigned char>   PixelType;
-  typedef itk::Image<PixelType, 2>        ImageType;
-  typedef itk::OpenSlideImageIO           ReaderIOType;
-  typedef itk::ImageFileReader<ImageType> ReaderType;
-  typedef itk::ImageFileWriter<ImageType> WriterType;
+  using PixelType = itk::RGBAPixel<unsigned char>;
+  using ImageType = itk::Image<PixelType, 2>;
+  using ReaderIOType = itk::OpenSlideImageIO;
+  using ReaderType = itk::ImageFileReader<ImageType>;
+  using WriterType = itk::ImageFileWriter<ImageType>;
 
   if( argc < 3 ) {
     std::cerr << "Usage: " << argv[0] << " inputImage outputImage [command1 command2 ...]\n";
