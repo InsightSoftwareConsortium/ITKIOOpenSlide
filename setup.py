@@ -20,8 +20,8 @@ setup(
     package_dir={'itk': 'itk'},
     download_url=r'https://github.com/InsightSoftwareConsortium/ITKIOOpenSlide',
     description=r"ImageIO for the OpenSlide library supported file formats.",
-    long_description='ITKIOOpenSlide provides an ImageIO for the OpenSlide'
-                     'library supported file formats. These are generally'
+    long_description='itk-ioopenslide provides an ImageIO for the OpenSlide '
+                     'library supported file formats. These are generally '
                      'TIFF-based microscopy formats.',
     classifiers=[
         "License :: OSI Approved :: Apache Software License",
@@ -43,8 +43,8 @@ setup(
         "Operating System :: MacOS"
         ],
     license='Apache',
-    keywords='ITK InsightToolkit',
-    url=r'https://itk.org/',
+    keywords='ITK InsightToolkit OpenSlide OpenSlide-Python Microscopy',
+    url=r'https://github.com/InsightSoftwareConsortium/ITKIOOpenSlide',
     install_requires=[
         r'itk'
     ]
