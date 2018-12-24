@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10.2)
 
-project(DumpSlideInformation CXX)
+project(IOOpenSlide_Examples CXX)
 
 find_package(ITK REQUIRED
   COMPONENTS
