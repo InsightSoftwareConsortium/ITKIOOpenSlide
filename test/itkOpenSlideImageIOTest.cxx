@@ -235,7 +235,7 @@ int itkOpenSlideImageIOTest( int argc, char * argv[] ) {
     p_clImageIO->UseStreamedReadingOn();
     p_clImageIO->SetApproximateStreaming(bApproximateStreaming);
 
-    itk::ImageIOBase::Pointer p_clWriterIO = itk::ImageIOFactory::CreateImageIO(p_cOutputImage, itk::ImageIOFactory::FileModeType::WriteMode);
+    itk::ImageIOBase::Pointer p_clWriterIO = itk::ImageIOFactory::CreateImageIO(p_cOutputImage, itk::IOFileModeEnum::WriteMode);
     if (!p_clWriterIO) {
       std::cerr << "Error: Could not create ImageIO for output image '" << p_cOutputImage << "'." << std::endl;
       return iFailCode;
