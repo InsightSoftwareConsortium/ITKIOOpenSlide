@@ -35,7 +35,7 @@ namespace itk
 class IOOpenSlide_EXPORT OpenSlideImageIOFactory : public ObjectFactoryBase
 {
 public:
-  ITK_DISALLOW_COPY_AND_ASSIGN(OpenSlideImageIOFactory);
+  ITK_DISALLOW_COPY_AND_MOVE(OpenSlideImageIOFactory);
 
   /** Standard class type alias. */
   using Self = OpenSlideImageIOFactory;

@@ -52,7 +52,7 @@ class OpenSlideWrapper;
 class IOOpenSlide_EXPORT OpenSlideImageIO : public ImageIOBase
 {
 public:
-  ITK_DISALLOW_COPY_AND_ASSIGN(OpenSlideImageIO);
+  ITK_DISALLOW_COPY_AND_MOVE(OpenSlideImageIO);
 
   /** Standard class type alias. */
   using Self = OpenSlideImageIO;
