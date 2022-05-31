@@ -1,4 +1,4 @@
-# Data from http://openslide.cs.cmu.edu/download/openslide-testdata/Hamamatsu/
+# Data from https://openslide.cs.cmu.edu/download/openslide-testdata/Hamamatsu/
 
 $ DumpSlideInformation OS-1.ndpi
 
