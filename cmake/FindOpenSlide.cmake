@@ -1,6 +1,6 @@
 # A CMake find module for the OpenSlide microscopy file reader library.
 #
-# http://openslide.org
+# https://openslide.org
 #
 # Once done, this module will define
 #   OPENSLIDE_FOUND         - system has OpenSlide
