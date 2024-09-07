@@ -1,20 +1,13 @@
 ITKIOOpenSlide
 ==============
 
-.. |CircleCI| image:: https://circleci.com/gh/InsightSoftwareConsortium/ITKIOOpenSlide.svg?style=shield
-    :target: https://circleci.com/gh/InsightSoftwareConsortium/ITKIOOpenSlide
+.. image:: https://github.com/InsightSoftwareConsortium/ITKIOOpenSlide/actions/workflows/build-test-package.yml/badge.svg
+    :target: https://github.com/InsightSoftwareConsortium/ITKIOOpenSlide/actions/workflows/build-test-package.yml
+    :alt: Build Status
 
-.. |TravisCI| image:: https://travis-ci.org/InsightSoftwareConsortium/ITKIOOpenSlide.svg?branch=master
-    :target: https://travis-ci.org/InsightSoftwareConsortium/ITKIOOpenSlide
-
-.. |AppVeyor| image:: https://img.shields.io/appveyor/ci/itkrobot/itkioopenslide.svg
-    :target: https://ci.appveyor.com/project/itkrobot/itkioopenslide
-
-=========== =========== ===========
-   Linux      macOS       Windows
-=========== =========== ===========
-|CircleCI|  |TravisCI|  |AppVeyor|
-=========== =========== ===========
+.. image:: https://img.shields.io/badge/License-Apache%202.0-blue.svg
+    :target: https://github.com/InsightSoftwareConsortium/ITKIOOpenSlide/blob/main/LICENSE
+    :alt: License
 
 
 Overview
