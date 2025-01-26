@@ -52,7 +52,7 @@ public:
   static OpenSlideImageIOFactory* FactoryNew() { return new OpenSlideImageIOFactory;}
 
   /** Run-time type information (and related methods). */
-  itkTypeMacro(OpenSlideImageIOFactory, ObjectFactoryBase);
+  itkOverrideGetNameOfClassMacro(OpenSlideImageIOFactory);
 
   /** Register one factory of this type  */
   static void RegisterOneFactory()
