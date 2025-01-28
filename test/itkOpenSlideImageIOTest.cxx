@@ -31,18 +31,22 @@
 
 #define SPECIFIC_IMAGEIO_MODULE_TEST
 
-namespace {
+namespace
+{
 
-bool ParseValue(const char *p_cValue, std::string &strCommand, std::string &strValue) {
+bool
+ParseValue(const char * p_cValue, std::string & strCommand, std::string & strValue)
+{
   strCommand.clear();
   strValue.clear();
 
   if (p_cValue == NULL)
     return false;
 
-  const char *p = strchr(p_cValue, '=');
+  const char * p = strchr(p_cValue, '=');
 
-  if (p == NULL) {
+  if (p == NULL)
+  {
     strCommand = p_cValue;
     return true;
   }
@@ -51,8 +55,8 @@ bool ParseValue(const char *p_cValue, std::string &strCommand, std::string &strV
   if (p == p_cValue)
     return false;
 
-  strCommand.assign(p_cValue, (p-p_cValue));
-  strValue = p+1;
+  strCommand.assign(p_cValue, (p - p_cValue));
+  strValue = p + 1;
 
   return true;
 }
@@ -88,99 +92,119 @@ bool CompressImageFile(const char *p_cFileName) {
 
 } // End anonymous namespace
 
-int itkOpenSlideImageIOTest( int argc, char * argv[] ) {
+int
+itkOpenSlideImageIOTest(int argc, char * argv[])
+{
   using PixelType = itk::RGBAPixel<unsigned char>;
   using ImageType = itk::Image<PixelType, 2>;
   using ReaderIOType = itk::OpenSlideImageIO;
   using ReaderType = itk::ImageFileReader<ImageType>;
   using WriterType = itk::ImageFileWriter<ImageType>;
 
-  if( argc < 3 ) {
+  if (argc < 3)
+  {
     std::cerr << "Usage: " << argv[0] << " inputImage outputImage [command1 command2 ...]\n";
     return EXIT_FAILURE;
   }
 
-  //const char * const p_cArg0 = argv[0];
+  // const char * const p_cArg0 = argv[0];
   const char * const p_cInputImage = argv[1];
   const char * const p_cOutputImage = argv[2];
 
   argc -= 3;
   argv += 3;
 
-  bool bShouldFail = false;
-  bool bUseCompression = false;
-  bool bApproximateStreaming = false;
+  bool         bShouldFail = false;
+  bool         bUseCompression = false;
+  bool         bApproximateStreaming = false;
   unsigned int uiNumStreams = 0; // 0 means no streaming
-  int iLevel = 0;
-  std::string strAssociatedImageName;
-  double dDownsampleFactor = 0.0; // 0 means no down sample
+  int          iLevel = 0;
+  std::string  strAssociatedImageName;
+  double       dDownsampleFactor = 0.0; // 0 means no down sample
 
-  for (int i = 0; i < argc; ++i) {
+  for (int i = 0; i < argc; ++i)
+  {
     std::string strCommand;
     std::string strValue;
 
-    if (!ParseValue(argv[i], strCommand, strValue)) {
+    if (!ParseValue(argv[i], strCommand, strValue))
+    {
       std::cerr << "Error: Could not parse value '" << argv[i] << "'." << std::endl;
       return EXIT_FAILURE;
     }
 
-    if (strCommand == "shouldFail") {
+    if (strCommand == "shouldFail")
+    {
       bShouldFail = true;
     }
-    else if (strCommand == "compress") {
+    else if (strCommand == "compress")
+    {
       bUseCompression = true;
     }
-    else if (strCommand == "approximateStreaming") {
+    else if (strCommand == "approximateStreaming")
+    {
       bApproximateStreaming = true;
     }
-    else if (strCommand == "level") {
-      if (strValue.empty()) {
+    else if (strCommand == "level")
+    {
+      if (strValue.empty())
+      {
         std::cerr << "Error: Expected level parameter." << std::endl;
         return EXIT_FAILURE;
       }
 
-      char *p = NULL;
+      char * p = NULL;
       iLevel = strtol(strValue.c_str(), &p, 10);
-      if (*p != '\0') {
+      if (*p != '\0')
+      {
         std::cerr << "Error: Could not parse level '" << strValue << "'." << std::endl;
         return EXIT_FAILURE;
       }
     }
-    else if (strCommand == "associatedImage") {
-      if (strValue.empty()) {
+    else if (strCommand == "associatedImage")
+    {
+      if (strValue.empty())
+      {
         std::cerr << "Error: Expected associated image name." << std::endl;
         return EXIT_FAILURE;
       }
 
       strAssociatedImageName = strValue;
     }
-    else if (strCommand == "downsample") {
-      if (strValue.empty()) {
+    else if (strCommand == "downsample")
+    {
+      if (strValue.empty())
+      {
         std::cerr << "Error: Expected downsample factor." << std::endl;
         return EXIT_FAILURE;
       }
 
-      char *p = NULL;
+      char * p = NULL;
       dDownsampleFactor = strtod(strValue.c_str(), &p);
-      if (*p != '\0') {
+      if (*p != '\0')
+      {
         std::cerr << "Error: Could not parse downsample factor '" << strValue << "'." << std::endl;
         return EXIT_FAILURE;
       }
     }
-    else if (strCommand == "stream") {
-      if (strValue.empty()) {
+    else if (strCommand == "stream")
+    {
+      if (strValue.empty())
+      {
         std::cerr << "Error: Expected number of streams." << std::endl;
         return EXIT_FAILURE;
       }
 
-      char *p = NULL;
+      char * p = NULL;
       uiNumStreams = strtoul(strValue.c_str(), &p, 10);
-      if (*p != '\0') {
+      if (*p != '\0')
+      {
         std::cerr << "Error: Could not parse number of streams '" << strValue << "'." << std::endl;
         return EXIT_FAILURE;
       }
     }
-    else {
+    else
+    {
       std::cout << "Error: Unknown command '" << argv[i] << "'." << std::endl;
       return EXIT_FAILURE;
     }
@@ -201,8 +225,8 @@ int itkOpenSlideImageIOTest( int argc, char * argv[] ) {
   std::cout << "downsample = " << dDownsampleFactor << std::endl;
 
   ReaderIOType::Pointer p_clImageIO = ReaderIOType::New();
-  ReaderType::Pointer p_clReader = ReaderType::New();
-  WriterType::Pointer p_clWriter = WriterType::New();
+  ReaderType::Pointer   p_clReader = ReaderType::New();
+  WriterType::Pointer   p_clWriter = WriterType::New();
 
   p_clImageIO->SetFileName(p_cInputImage);
 
@@ -212,10 +236,12 @@ int itkOpenSlideImageIOTest( int argc, char * argv[] ) {
   p_clWriter->SetInput(p_clReader->GetOutput());
   p_clWriter->SetFileName(p_cOutputImage);
 
-  try {
+  try
+  {
     p_clImageIO->ReadImageInformation();
   }
-  catch (itk::ExceptionObject &e) {
+  catch (itk::ExceptionObject & e)
+  {
     std::cerr << "Error: " << e << std::endl;
     return iFailCode;
   }
@@ -228,15 +254,18 @@ int itkOpenSlideImageIOTest( int argc, char * argv[] ) {
   if (dDownsampleFactor > 0.0 && !p_clImageIO->SetLevelForDownsampleFactor(dDownsampleFactor))
     return iFailCode;
 
-  if (uiNumStreams > 0) {
+  if (uiNumStreams > 0)
+  {
     if (!p_clImageIO->CanStreamRead())
       return iFailCode;
 
     p_clImageIO->UseStreamedReadingOn();
     p_clImageIO->SetApproximateStreaming(bApproximateStreaming);
 
-    itk::ImageIOBase::Pointer p_clWriterIO = itk::ImageIOFactory::CreateImageIO(p_cOutputImage, itk::IOFileModeEnum::WriteMode);
-    if (!p_clWriterIO) {
+    itk::ImageIOBase::Pointer p_clWriterIO =
+      itk::ImageIOFactory::CreateImageIO(p_cOutputImage, itk::IOFileModeEnum::WriteMode);
+    if (!p_clWriterIO)
+    {
       std::cerr << "Error: Could not create ImageIO for output image '" << p_cOutputImage << "'." << std::endl;
       return iFailCode;
     }
@@ -253,16 +282,18 @@ int itkOpenSlideImageIOTest( int argc, char * argv[] ) {
   // XXX: Just so you know, this might disable streaming
   p_clWriter->SetUseCompression(bUseCompression);
 
-  try {
+  try
+  {
     p_clWriter->Update();
   }
-  catch (itk::ExceptionObject &e) {
+  catch (itk::ExceptionObject & e)
+  {
     std::cerr << "Error: " << e << std::endl;
     return iFailCode;
   }
 
   // Use this to compress output images when updating tests
-  //CompressImageFile(p_cOutputImage);
+  // CompressImageFile(p_cOutputImage);
 
   return iSuccessCode;
 }
