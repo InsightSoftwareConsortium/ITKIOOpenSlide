@@ -25,24 +25,19 @@ namespace itk
 {
 OpenSlideImageIOFactory::OpenSlideImageIOFactory()
 {
-  this->RegisterOverride("itkImageIOBase",
-                         "itkOpenSlideImageIO",
-                         "OpenSlide Image IO",
-                         1,
-                         CreateObjectFunction<OpenSlideImageIO>::New());
+  this->RegisterOverride(
+    "itkImageIOBase", "itkOpenSlideImageIO", "OpenSlide Image IO", 1, CreateObjectFunction<OpenSlideImageIO>::New());
 }
 
-OpenSlideImageIOFactory::~OpenSlideImageIOFactory()
-{
-}
+OpenSlideImageIOFactory::~OpenSlideImageIOFactory() {}
 
-const char*
+const char *
 OpenSlideImageIOFactory::GetITKSourceVersion() const
 {
   return ITK_SOURCE_VERSION;
 }
 
-const char*
+const char *
 OpenSlideImageIOFactory::GetDescription() const
 {
   return "OpenSlide ImageIO Factory, allows the loading of OpenSlide images into insight";
@@ -53,13 +48,14 @@ OpenSlideImageIOFactory::GetDescription() const
 
 static bool OpenSlideImageIOFactoryHasBeenRegistered;
 
-void IOOpenSlide_EXPORT OpenSlideImageIOFactoryRegister__Private(void)
+void IOOpenSlide_EXPORT
+OpenSlideImageIOFactoryRegister__Private(void)
 {
-  if( ! OpenSlideImageIOFactoryHasBeenRegistered )
-    {
+  if (!OpenSlideImageIOFactoryHasBeenRegistered)
+  {
     OpenSlideImageIOFactoryHasBeenRegistered = true;
     OpenSlideImageIOFactory::RegisterOneFactory();
-    }
+  }
 }
 
 } // end namespace itk

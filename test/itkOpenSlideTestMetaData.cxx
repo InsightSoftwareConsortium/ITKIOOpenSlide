@@ -28,23 +28,27 @@
 
 #define SPECIFIC_IMAGEIO_MODULE_TEST
 
-namespace {
+namespace
+{
 
-class ReplaceStream {
+class ReplaceStream
+{
 public:
-  ReplaceStream(std::ios &stream, const std::ios &newStream)
-  : m_Stream(stream), m_OriginalBuf(stream.rdbuf(newStream.rdbuf())) { }
+  ReplaceStream(std::ios & stream, const std::ios & newStream)
+    : m_Stream(stream)
+    , m_OriginalBuf(stream.rdbuf(newStream.rdbuf()))
+  {}
 
-  ~ReplaceStream() {
-    m_Stream.rdbuf(m_OriginalBuf);
-  }
+  ~ReplaceStream() { m_Stream.rdbuf(m_OriginalBuf); }
 
 private:
-  std::ios               &m_Stream;
+  std::ios &             m_Stream;
   std::streambuf * const m_OriginalBuf;
 };
 
-bool ReadFileStripCR(const char *p_cFileName, std::vector<char> &vBuffer) {
+bool
+ReadFileStripCR(const char * p_cFileName, std::vector<char> & vBuffer)
+{
   vBuffer.clear();
 
   std::ifstream fileStream(p_cFileName);
@@ -61,8 +65,10 @@ bool ReadFileStripCR(const char *p_cFileName, std::vector<char> &vBuffer) {
     return false;
 
   size_t j = 0;
-  for (size_t i = 0; i < vBuffer.size(); ++i) {
-    if (vBuffer[i] != '\r') {
+  for (size_t i = 0; i < vBuffer.size(); ++i)
+  {
+    if (vBuffer[i] != '\r')
+    {
       vBuffer[j] = vBuffer[i];
       ++j;
     }
@@ -75,14 +81,17 @@ bool ReadFileStripCR(const char *p_cFileName, std::vector<char> &vBuffer) {
 
 } // End anonymous namespace
 
-int itkOpenSlideTestMetaData( int argc, char * argv[] ) {
+int
+itkOpenSlideTestMetaData(int argc, char * argv[])
+{
   using ImageIOType = itk::OpenSlideImageIO;
   using PixelType = itk::RGBAPixel<unsigned char>;
   using ImageType = itk::Image<PixelType, 2>;
   using SizeType = ImageType::SizeType;
   using SpacingType = ImageType::SpacingType;
 
-  if (argc < 2 || argc > 4) {
+  if (argc < 2 || argc > 4)
+  {
     std::cerr << "Usage: " << argv[0] << " slideFile [outputLog] [comparisonLog]" << std::endl;
     return EXIT_FAILURE;
   }
@@ -91,12 +100,14 @@ int itkOpenSlideTestMetaData( int argc, char * argv[] ) {
   const char * const p_cOutputLog = argc > 2 ? argv[2] : "stdout";
   const char * const p_cCompareLog = argc > 3 ? argv[3] : NULL;
 
-  std::ofstream logFileStream;
-  std::ostream *p_outStream = &std::cout;
+  std::ofstream  logFileStream;
+  std::ostream * p_outStream = &std::cout;
 
-  if (strcmp(p_cOutputLog, "stdout") != 0) {
+  if (strcmp(p_cOutputLog, "stdout") != 0)
+  {
     logFileStream.open(p_cOutputLog, std::ofstream::out | std::ofstream::trunc);
-    if (!logFileStream) {
+    if (!logFileStream)
+    {
       std::cerr << "Error: Could not open output log '" << p_cOutputLog << "'." << std::endl;
       return EXIT_FAILURE;
     }
@@ -111,15 +122,17 @@ int itkOpenSlideTestMetaData( int argc, char * argv[] ) {
 
   p_clImageIO->SetFileName(p_cSlideFile);
 
-  try {
+  try
+  {
     p_clImageIO->ReadImageInformation();
   }
-  catch (itk::ExceptionObject &e) {
+  catch (itk::ExceptionObject & e)
+  {
     std::cerr << "Error: " << e << std::endl;
     return EXIT_FAILURE;
   }
 
-  const std::string strComponentType = itk::ImageIOBase::GetComponentTypeAsString(p_clImageIO->GetComponentType()); 
+  const std::string strComponentType = itk::ImageIOBase::GetComponentTypeAsString(p_clImageIO->GetComponentType());
   const std::string strPixelType = itk::ImageIOBase::GetPixelTypeAsString(p_clImageIO->GetPixelType());
 
   std::cout << "\nImage Information:\n" << std::endl;
@@ -131,8 +144,10 @@ int itkOpenSlideTestMetaData( int argc, char * argv[] ) {
   // Some sanity checks
 
   // Check dimensions
-  if (p_clImageIO->GetNumberOfDimensions() != ImageType::GetImageDimension()) {
-    std::cerr << "Error: ImageIO should report dimension " << ImageType::GetImageDimension() << " but reports " << p_clImageIO->GetNumberOfDimensions() << '.' << std::endl;
+  if (p_clImageIO->GetNumberOfDimensions() != ImageType::GetImageDimension())
+  {
+    std::cerr << "Error: ImageIO should report dimension " << ImageType::GetImageDimension() << " but reports "
+              << p_clImageIO->GetNumberOfDimensions() << '.' << std::endl;
     return EXIT_FAILURE;
   }
 
@@ -144,32 +159,38 @@ int itkOpenSlideTestMetaData( int argc, char * argv[] ) {
     PixelType clTmpPixel;
     p_clTmpIO->SetPixelTypeInfo(&clTmpPixel);
 
-    const std::string strExpectedComponentType = itk::ImageIOBase::GetComponentTypeAsString(p_clTmpIO->GetComponentType());
+    const std::string strExpectedComponentType =
+      itk::ImageIOBase::GetComponentTypeAsString(p_clTmpIO->GetComponentType());
     const std::string strExpectedPixelType = itk::ImageIOBase::GetPixelTypeAsString(p_clTmpIO->GetPixelType());
 
-    if (strExpectedComponentType != strComponentType) {
-      std::cerr << "Error: ImageIO should report a component type of " << strExpectedComponentType << " but reports " << strComponentType << '.' << std::endl;
+    if (strExpectedComponentType != strComponentType)
+    {
+      std::cerr << "Error: ImageIO should report a component type of " << strExpectedComponentType << " but reports "
+                << strComponentType << '.' << std::endl;
       return EXIT_FAILURE;
     }
 
-    if (strExpectedPixelType != strPixelType) {
-      std::cerr << "Error: ImageIO should report a pixel type of " << strExpectedPixelType << " but reports " << strPixelType << '.' << std::endl;
+    if (strExpectedPixelType != strPixelType)
+    {
+      std::cerr << "Error: ImageIO should report a pixel type of " << strExpectedPixelType << " but reports "
+                << strPixelType << '.' << std::endl;
       return EXIT_FAILURE;
     }
   }
-    
+
   // Sanity checks passed
 
   std::cout << "\nMeta Data:\n" << std::endl;
 
-  itk::MetaDataDictionary &clTags = p_clImageIO->GetMetaDataDictionary();
-  std::vector<std::string> vKeys = clTags.GetKeys();
+  itk::MetaDataDictionary & clTags = p_clImageIO->GetMetaDataDictionary();
+  std::vector<std::string>  vKeys = clTags.GetKeys();
 
   std::cout << "Number of keys: " << vKeys.size() << std::endl;
   std::cout << "Entries:" << std::endl;
-  for (size_t i = 0; i < vKeys.size(); ++i) {
-    const std::string &strKey = vKeys[i];
-    std::string strValue;
+  for (size_t i = 0; i < vKeys.size(); ++i)
+  {
+    const std::string & strKey = vKeys[i];
+    std::string         strValue;
 
     if (itk::ExposeMetaData(clTags, strKey, strValue))
       std::cout << strKey << " = " << strValue << std::endl;
@@ -181,13 +202,16 @@ int itkOpenSlideTestMetaData( int argc, char * argv[] ) {
   std::cout << "Level count: " << iLevelCount << std::endl;
 
   std::cout << "Levels:" << std::endl;
-  for (int iLevel = 0; iLevel < iLevelCount; ++iLevel) {
+  for (int iLevel = 0; iLevel < iLevelCount; ++iLevel)
+  {
     p_clImageIO->SetLevel(iLevel);
 
-    try {
+    try
+    {
       p_clImageIO->ReadImageInformation();
     }
-    catch (itk::ExceptionObject &e) {
+    catch (itk::ExceptionObject & e)
+    {
       std::cerr << "Error: " << e << std::endl;
       return EXIT_FAILURE;
     }
@@ -201,9 +225,10 @@ int itkOpenSlideTestMetaData( int argc, char * argv[] ) {
     clSpacing[1] = p_clImageIO->GetSpacing(1);
 
     const size_t sizeInBytes = p_clImageIO->GetImageSizeInBytes();
-    const int iCurrentLevel = p_clImageIO->GetLevel();
+    const int    iCurrentLevel = p_clImageIO->GetLevel();
 
-    std::cout << "Level " << iCurrentLevel << ": dimensions = " << clSize << ", spacing = " << clSpacing << ", size in bytes = " << sizeInBytes << std::endl;
+    std::cout << "Level " << iCurrentLevel << ": dimensions = " << clSize << ", spacing = " << clSpacing
+              << ", size in bytes = " << sizeInBytes << std::endl;
   }
 
   std::cout << "\nAssociated image information:\n" << std::endl;
@@ -215,13 +240,14 @@ int itkOpenSlideTestMetaData( int argc, char * argv[] ) {
 
   const size_t numWordsPerLine = 3;
 
-  for (size_t i = 0; i < vAssociatedImages.size(); i += numWordsPerLine) {
+  for (size_t i = 0; i < vAssociatedImages.size(); i += numWordsPerLine)
+  {
     const size_t jBegin = i;
     const size_t jEnd = std::min(vAssociatedImages.size(), jBegin + numWordsPerLine);
 
     std::cout << '\'' << vAssociatedImages[jBegin] << '\'';
 
-    for (size_t j = jBegin+1; j < jEnd; ++j)
+    for (size_t j = jBegin + 1; j < jEnd; ++j)
       std::cout << ", '" << vAssociatedImages[j] << '\'';
 
     if (i + numWordsPerLine < vAssociatedImages.size())
@@ -232,15 +258,18 @@ int itkOpenSlideTestMetaData( int argc, char * argv[] ) {
 
   std::cout << "\nAssociated images:" << std::endl;
 
-  for (size_t i = 0; i < vAssociatedImages.size(); ++i) {
-    const std::string &strAssociatedImage = vAssociatedImages[i];
+  for (size_t i = 0; i < vAssociatedImages.size(); ++i)
+  {
+    const std::string & strAssociatedImage = vAssociatedImages[i];
 
     p_clImageIO->SetAssociatedImageName(strAssociatedImage);
 
-    try {
+    try
+    {
       p_clImageIO->ReadImageInformation();
     }
-    catch (itk::ExceptionObject &e) {
+    catch (itk::ExceptionObject & e)
+    {
       std::cerr << "Error: " << e << std::endl;
       return EXIT_FAILURE;
     }
@@ -253,23 +282,27 @@ int itkOpenSlideTestMetaData( int argc, char * argv[] ) {
     clSpacing[0] = p_clImageIO->GetSpacing(0);
     clSpacing[1] = p_clImageIO->GetSpacing(1);
 
-    const size_t sizeInBytes = p_clImageIO->GetImageSizeInBytes();
+    const size_t      sizeInBytes = p_clImageIO->GetImageSizeInBytes();
     const std::string strCurrentAssociatedImage = p_clImageIO->GetAssociatedImageName();
 
-    std::cout << strCurrentAssociatedImage << ": dimensions = " << clSize << ", spacing = " << clSpacing << ", size in bytes = " << sizeInBytes << std::endl;
+    std::cout << strCurrentAssociatedImage << ": dimensions = " << clSize << ", spacing = " << clSpacing
+              << ", size in bytes = " << sizeInBytes << std::endl;
   }
 
-  if (p_cCompareLog != NULL) {
+  if (p_cCompareLog != NULL)
+  {
     logFileStream.close();
 
     std::vector<char> vBuffer1, vBuffer2;
 
-    if (!ReadFileStripCR(p_cOutputLog, vBuffer1)) {
+    if (!ReadFileStripCR(p_cOutputLog, vBuffer1))
+    {
       std::cerr << "Error: Could not read output log file '" << p_cOutputLog << "'." << std::endl;
       return EXIT_FAILURE;
     }
 
-    if (!ReadFileStripCR(p_cCompareLog, vBuffer2)) {
+    if (!ReadFileStripCR(p_cCompareLog, vBuffer2))
+    {
       std::cerr << "Error: Could not read comparison log file '" << p_cCompareLog << "'." << std::endl;
       return EXIT_FAILURE;
     }

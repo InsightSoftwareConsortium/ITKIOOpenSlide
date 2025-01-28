@@ -34,16 +34,19 @@ namespace itk
 
 // OpenSlide wrapper class
 // This is responsible for freeing the OpenSlide context on destruction
-// It also allows for seamless access to various levels and associated images through one set of functions (as opposed to two)
-class OpenSlideWrapper {
+// It also allows for seamless access to various levels and associated images through one set of functions (as opposed
+// to two)
+class OpenSlideWrapper
+{
 public:
-
-  // GCD Algorithm from wikipedia pseudo code: 
+  // GCD Algorithm from wikipedia pseudo code:
   // https://en.wikipedia.org/wiki/Greatest_common_divisor#Binary_method
-  // 
+  //
   // NOTE: While vnl_rational can do this too, vnl_rational is defined for long integers (32 bit integers on amd64).
   //       Slides can be extremely large. It would ideal to work with 64 bit integers.
-  static uint64_t GCD(uint64_t ui64A, uint64_t ui64B) {
+  static uint64_t
+  GCD(uint64_t ui64A, uint64_t ui64B)
+  {
     if (ui64A == 0)
       return ui64B;
 
@@ -57,13 +60,15 @@ public:
       return ui64A;
 
     unsigned int uiExp = 0;
-    while ((ui64A & 1) == 0 && (ui64B & 1) == 0) {
+    while ((ui64A & 1) == 0 && (ui64B & 1) == 0)
+    {
       ui64A >>= 1;
       ui64B >>= 1;
       ++uiExp;
     }
 
-    while (ui64A != ui64B) {
+    while (ui64A != ui64B)
+    {
       if ((ui64A & 1) == 0)
         ui64A >>= 1;
       else if ((ui64B & 1) == 0)
@@ -78,28 +83,36 @@ public:
   }
 
   // Detects the vendor. Should return NULL if the file is not readable.
-  static const char * DetectVendor(const char *p_cFileName) {
+  static const char *
+  DetectVendor(const char * p_cFileName)
+  {
     return openslide_detect_vendor(p_cFileName);
   }
 
   // Weak check if the file can be read
-  static bool CanReadFile(const char *p_cFileName) {
+  static bool
+  CanReadFile(const char * p_cFileName)
+  {
     return DetectVendor(p_cFileName) != NULL;
   }
 
   // Returns version of OpenSlide library
-  static const char * GetVersion() {
+  static const char *
+  GetVersion()
+  {
     return openslide_get_version();
   }
 
   // Constructors
-  OpenSlideWrapper() {
+  OpenSlideWrapper()
+  {
     m_Osr = NULL;
     m_Level = 0;
     m_ApproximateStreaming = false;
   }
 
-  OpenSlideWrapper(const char *p_cFileName) {
+  OpenSlideWrapper(const char * p_cFileName)
+  {
     m_Osr = NULL;
     m_Level = 0;
     m_ApproximateStreaming = false;
@@ -107,23 +120,27 @@ public:
   }
 
   // Destructor
-  ~OpenSlideWrapper() {
-    Close();
-  }
+  ~OpenSlideWrapper() { Close(); }
 
   // Set whether streaming should be approximate or exact
-  void SetApproximateStreaming(bool bApproximateStreaming) {
+  void
+  SetApproximateStreaming(bool bApproximateStreaming)
+  {
     m_ApproximateStreaming = bApproximateStreaming;
   }
 
   // Determine whether streaming is exact or approximate
-  bool GetApproximateStreaming() const {
+  bool
+  GetApproximateStreaming() const
+  {
     return m_ApproximateStreaming;
   }
 
   // Tells the ImageIO if the wrapper is in a state where stream reading can occur.
   // While OpenSlide supports reading regions of level images, it does not for associated images.
-  bool CanStreamRead() const {
+  bool
+  CanStreamRead() const
+  {
     if (m_AssociatedImage.size() > 0)
       return false;
 
@@ -132,27 +149,36 @@ public:
   }
 
   // Closes the currently opened file
-  void Close() {
-    if (m_Osr != NULL) {
+  void
+  Close()
+  {
+    if (m_Osr != NULL)
+    {
       openslide_close(m_Osr);
       m_Osr = NULL;
     }
   }
 
   // Checks weather a slide file is currently opened
-  bool IsOpened() const {
+  bool
+  IsOpened() const
+  {
     return m_Osr != NULL;
   }
 
   // Opens a slide file
-  bool Open(const char *p_cFileName) {
+  bool
+  Open(const char * p_cFileName)
+  {
     Close();
     m_Osr = openslide_open(p_cFileName);
     return m_Osr != NULL;
   }
 
   // Get error string, NULL if there is no error
-  const char * GetError() const {
+  const char *
+  GetError() const
+  {
     if (m_Osr == NULL)
       return "OpenSlideWrapper has no file open.";
 
@@ -161,29 +187,39 @@ public:
 
   // Sets the level that is accessible with ReadRegion, GetDimensions, GetSpacing.
   // Clears any associated image context.
-  void SetLevel(int32_t i32Level) {
+  void
+  SetLevel(int32_t i32Level)
+  {
     m_Level = i32Level;
     m_AssociatedImage.clear();
   }
 
   // Returns the currently selected level
-  int32_t GetLevel() const {
+  int32_t
+  GetLevel() const
+  {
     return m_Level;
   }
 
   // Sets the associated image that is accessible with ReadRegion, GetDimensions
-  void SetAssociatedImageName(const std::string &strImageName) {
+  void
+  SetAssociatedImageName(const std::string & strImageName)
+  {
     m_AssociatedImage = strImageName;
     m_Level = 0;
   }
 
   // Returns the currently selected associated image
-  const std::string & GetAssociatedImageName() const {
+  const std::string &
+  GetAssociatedImageName() const
+  {
     return m_AssociatedImage;
   }
 
   // Given a downsample factor, uses OpenSlide to determine the best level to use.
-  bool SetBestLevelForDownsample(double dDownsample) {
+  bool
+  SetBestLevelForDownsample(double dDownsample)
+  {
     if (m_Osr == NULL)
       return false;
 
@@ -198,7 +234,9 @@ public:
   }
 
   // Returns the number of levels in this file
-  int32_t GetLevelCount() const {
+  int32_t
+  GetLevelCount() const
+  {
     if (m_Osr == NULL)
       return -1;
 
@@ -207,14 +245,18 @@ public:
 
   // Returns NULL for success
   // NOTE: When reading associated images, x, y, width and height are ignored.
-  const char * ReadRegion(uint32_t *p_ui32Dest, int64_t i64X, int64_t i64Y, int64_t i64Width, int64_t i64Height) const {
+  const char *
+  ReadRegion(uint32_t * p_ui32Dest, int64_t i64X, int64_t i64Y, int64_t i64Width, int64_t i64Height) const
+  {
     if (m_Osr == NULL)
       return "OpenSlideWrapper has no file open.";
 
-    if (m_AssociatedImage.size() > 0) {
+    if (m_AssociatedImage.size() > 0)
+    {
       openslide_read_associated_image(m_Osr, m_AssociatedImage.c_str(), p_ui32Dest);
     }
-    else {
+    else
+    {
       const double dDownsampleFactor = openslide_get_level_downsample(m_Osr, m_Level);
 
       if (dDownsampleFactor <= 0.0)
@@ -233,8 +275,11 @@ public:
   }
 
   // Computes the spacing depending on selected level
-  // Default spacing is relative to 1 MPP if the function fails to detect spacing information (downsample factor is considered)
-  bool GetSpacing(double &dSpacingX, double &dSpacingY) const {
+  // Default spacing is relative to 1 MPP if the function fails to detect spacing information (downsample factor is
+  // considered)
+  bool
+  GetSpacing(double & dSpacingX, double & dSpacingY) const
+  {
     dSpacingX = dSpacingY = 1.0;
 
     if (m_Osr == NULL)
@@ -248,7 +293,9 @@ public:
     if (dDownsample <= 0.0)
       return false;
 
-    if (!GetPropertyValue(OPENSLIDE_PROPERTY_NAME_MPP_X, dSpacingX) || !GetPropertyValue(OPENSLIDE_PROPERTY_NAME_MPP_Y, dSpacingY)) {
+    if (!GetPropertyValue(OPENSLIDE_PROPERTY_NAME_MPP_X, dSpacingX) ||
+        !GetPropertyValue(OPENSLIDE_PROPERTY_NAME_MPP_Y, dSpacingY))
+    {
       dSpacingX = dSpacingY = dDownsample;
       return false;
     }
@@ -260,7 +307,9 @@ public:
   }
 
   // Returns the dimension of the level or associated image
-  bool GetDimensions(int64_t &i64Width, int64_t &i64Height) const {
+  bool
+  GetDimensions(int64_t & i64Width, int64_t & i64Height) const
+  {
     i64Width = i64Height = 0;
 
     if (m_Osr == NULL)
@@ -275,7 +324,9 @@ public:
   }
 
   // Retrieves associated image names from the open slide and places them into a std::vector
-  std::vector<std::string> GetAssociatedImageNames() const {
+  std::vector<std::string>
+  GetAssociatedImageNames() const
+  {
     if (m_Osr == NULL)
       return std::vector<std::string>();
 
@@ -283,7 +334,7 @@ public:
 
     if (p_cNames == NULL)
       return std::vector<std::string>();
-  
+
     std::vector<std::string> vNames;
 
     for (int i = 0; p_cNames[i] != NULL; ++i)
@@ -293,7 +344,9 @@ public:
   }
 
   // Forms an ITK MetaDataDictionary
-  MetaDataDictionary GetMetaDataDictionary() const {
+  MetaDataDictionary
+  GetMetaDataDictionary() const
+  {
     if (m_Osr == NULL)
       return MetaDataDictionary();
 
@@ -301,10 +354,12 @@ public:
 
     const char * const * p_cNames = openslide_get_property_names(m_Osr);
 
-    if (p_cNames != NULL) {
+    if (p_cNames != NULL)
+    {
       std::string strValue;
 
-      for (int i = 0; p_cNames[i] != NULL; ++i) {
+      for (int i = 0; p_cNames[i] != NULL; ++i)
+      {
         strValue.clear();
 
         if (GetPropertyValue(p_cNames[i], strValue))
@@ -316,8 +371,10 @@ public:
   }
 
   // Templated functions for accessing and casting property values
-  template<typename ValueType>
-  bool GetPropertyValue(const char *p_cKey, ValueType &value) const {
+  template <typename ValueType>
+  bool
+  GetPropertyValue(const char * p_cKey, ValueType & value) const
+  {
     if (m_Osr == NULL)
       return false;
 
@@ -333,7 +390,9 @@ public:
     return !valueStream.fail() && !valueStream.bad();
   }
 
-  bool GetPropertyValue(const char *p_cKey, std::string &strValue) const {
+  bool
+  GetPropertyValue(const char * p_cKey, std::string & strValue) const
+  {
     if (m_Osr == NULL)
       return false;
 
@@ -363,13 +422,15 @@ public:
   // x_0 = floor(x_L * D)
   //
   // In this implementation, ITK works with coordinates at the selected level. When L > 0, it becomes challenging
-  // to pick coordinates x_0 that identify x_L exactly. We derive x_0 by upsampling as above. But several values of x_0 will map to x_L.
-  // We need to pick x_L so that it is invariant to an upsample and subsequent downsample. In math we want x_L so that:
+  // to pick coordinates x_0 that identify x_L exactly. We derive x_0 by upsampling as above. But several values of x_0
+  // will map to x_L. We need to pick x_L so that it is invariant to an upsample and subsequent downsample. In math we
+  // want x_L so that:
   //
   // x_L = Downsample(Upsample(x_L)) = floor(floor(x_L * D) / D)
   //
-  // D is known to be a rational number A/B since it is computed by dividing the dimensions of level 0 and level L images.
-  // If A/B is a reduced fraction, we would like to determine x_L so that it is divisible by B. When B divides x_L we have the identity:
+  // D is known to be a rational number A/B since it is computed by dividing the dimensions of level 0 and level L
+  // images. If A/B is a reduced fraction, we would like to determine x_L so that it is divisible by B. When B divides
+  // x_L we have the identity:
   //
   // Upsample(x_L) = D * x_L
   //
@@ -378,15 +439,18 @@ public:
   // Downsample(D * x_L) = x_L
   //
   // Which is what we wanted. Consequently, if dimensions are coprime, the image cannot technically be streamed.
-  // In that case the ImageIORegion would reflect entire level L image. 
+  // In that case the ImageIORegion would reflect entire level L image.
   // This wrapper also supports approximate streaming (ignoring this issue).
-  bool ComputeMinimumStreamableRegionSize(int64_t &i64Width, int64_t &i64Height) const {
+  bool
+  ComputeMinimumStreamableRegionSize(int64_t & i64Width, int64_t & i64Height) const
+  {
     i64Width = i64Height = 0;
 
     if (m_Osr == NULL)
       return false;
 
-    if (m_Level == 0 || m_ApproximateStreaming) { // Nothing to do
+    if (m_Level == 0 || m_ApproximateStreaming)
+    { // Nothing to do
       i64Width = i64Height = 1;
       return true;
     }
@@ -407,7 +471,9 @@ public:
   }
 
   // Compute absolute maximum number of streamable regions
-  int64_t ComputeMaximumNumberOfStreamableRegions() const {
+  int64_t
+  ComputeMaximumNumberOfStreamableRegions() const
+  {
     int64_t i64RegionWidth = 0, i64RegionHeight = 0;
 
     if (!ComputeMinimumStreamableRegionSize(i64RegionWidth, i64RegionHeight))
@@ -425,7 +491,9 @@ public:
   }
 
   // After alignment, what's the maximum number of streamable regions of this size?
-  int64_t ComputeMaximumNumberOfStreamableRegions(int64_t i64X, int64_t i64Y, int64_t i64Width, int64_t i64Height) const {
+  int64_t
+  ComputeMaximumNumberOfStreamableRegions(int64_t i64X, int64_t i64Y, int64_t i64Width, int64_t i64Height) const
+  {
     if (m_Osr == NULL)
       return -1;
 
@@ -439,11 +507,13 @@ public:
     if (!AlignReadRegion(i64X, i64Y, i64Width, i64Height))
       return -1;
 
-    return (i64ImageWidth + i64Width - 1)/i64Width * (i64ImageHeight + i64Height - 1)/i64Height;
+    return (i64ImageWidth + i64Width - 1) / i64Width * (i64ImageHeight + i64Height - 1) / i64Height;
   }
 
   // Align X, Y and region dimensions to be on the grid of points invariant to upsample/downsample
-  bool AlignReadRegion(int64_t &i64X, int64_t &i64Y, int64_t &i64Width, int64_t &i64Height) const {
+  bool
+  AlignReadRegion(int64_t & i64X, int64_t & i64Y, int64_t & i64Width, int64_t & i64Height) const
+  {
     if (m_Osr == NULL)
       return false;
 
@@ -482,10 +552,10 @@ public:
   }
 
 private:
-  openslide_t *m_Osr;
-  int32_t      m_Level;
-  std::string  m_AssociatedImage;
-  bool         m_ApproximateStreaming;
+  openslide_t * m_Osr;
+  int32_t       m_Level;
+  std::string   m_AssociatedImage;
+  bool          m_ApproximateStreaming;
 };
 
 OpenSlideImageIO::OpenSlideImageIO()
@@ -497,7 +567,7 @@ OpenSlideImageIO::OpenSlideImageIO()
   m_OpenSlideWrapper = new OpenSlideWrapper();
 
   this->SetNumberOfDimensions(2); // OpenSlide is 2D.
-  this->SetPixelTypeInfo(&clPixel);  
+  this->SetPixelTypeInfo(&clPixel);
 
   m_Spacing[0] = 1.0;
   m_Spacing[1] = 1.0;
@@ -530,40 +600,52 @@ OpenSlideImageIO::OpenSlideImageIO()
 
 OpenSlideImageIO::~OpenSlideImageIO()
 {
-  if (m_OpenSlideWrapper != NULL) {
+  if (m_OpenSlideWrapper != NULL)
+  {
     delete m_OpenSlideWrapper;
     m_OpenSlideWrapper = NULL;
   }
 }
 
-void OpenSlideImageIO::PrintSelf(std::ostream& os, Indent indent) const {
+void
+OpenSlideImageIO::PrintSelf(std::ostream & os, Indent indent) const
+{
   Superclass::PrintSelf(os, indent);
   os << indent << "Level: " << GetLevel() << '\n';
   os << indent << "Associated Image: " << GetAssociatedImageName() << '\n';
 }
 
-bool OpenSlideImageIO::CanReadFile( const char* filename ) {
-  std::string fname(filename);
-  bool supportedExtension = false;
+bool
+OpenSlideImageIO::CanReadFile(const char * filename)
+{
+  std::string                           fname(filename);
+  bool                                  supportedExtension = false;
   ArrayOfExtensionsType::const_iterator extIt;
 
-  for( extIt = this->GetSupportedReadExtensions().begin(); extIt != this->GetSupportedReadExtensions().end(); ++extIt) {
-    if( fname.rfind( *extIt ) != std::string::npos ) {
+  for (extIt = this->GetSupportedReadExtensions().begin(); extIt != this->GetSupportedReadExtensions().end(); ++extIt)
+  {
+    if (fname.rfind(*extIt) != std::string::npos)
+    {
       supportedExtension = true;
     }
   }
-  if( !supportedExtension ) {
+  if (!supportedExtension)
+  {
     return false;
   }
 
   return OpenSlideWrapper::CanReadFile(filename);
 }
 
-bool OpenSlideImageIO::CanStreamRead() {
+bool
+OpenSlideImageIO::CanStreamRead()
+{
   return m_OpenSlideWrapper != NULL && m_OpenSlideWrapper->CanStreamRead();
 }
 
-void OpenSlideImageIO::ReadImageInformation() {
+void
+OpenSlideImageIO::ReadImageInformation()
+{
   using PixelType = RGBAPixel<unsigned char>;
   PixelType clPixel;
 
@@ -579,19 +661,17 @@ void OpenSlideImageIO::ReadImageInformation() {
   m_Origin[0] = 0.0;
   m_Origin[1] = 0.0;
 
-  if (m_OpenSlideWrapper == NULL) {
-    itkExceptionMacro( "Error OpenSlideImageIO could not open file: "
-                       << this->GetFileName()
-                       << std::endl
-                       << "Reason: NULL OpenSlideWrapper pointer.");
+  if (m_OpenSlideWrapper == NULL)
+  {
+    itkExceptionMacro("Error OpenSlideImageIO could not open file: " << this->GetFileName() << std::endl
+                                                                     << "Reason: NULL OpenSlideWrapper pointer.");
   }
 
-  if (!m_OpenSlideWrapper->Open(this->GetFileName())) {
-    itkExceptionMacro( "Error OpenSlideImageIO could not open file: "
-                       << this->GetFileName()
-                       << std::endl
-                       << "Reason: "
-                       << itksys::SystemTools::GetLastSystemError() );
+  if (!m_OpenSlideWrapper->Open(this->GetFileName()))
+  {
+    itkExceptionMacro("Error OpenSlideImageIO could not open file: " << this->GetFileName() << std::endl
+                                                                     << "Reason: "
+                                                                     << itksys::SystemTools::GetLastSystemError());
     // NOTE: OpenSlide needs to be opened to query API for errors. This is assumed to be related to a system error.
   }
 
@@ -601,29 +681,29 @@ void OpenSlideImageIO::ReadImageInformation() {
 
   {
     int64_t i64Width = 0, i64Height = 0;
-    if (!m_OpenSlideWrapper->GetDimensions(i64Width, i64Height)) {
-      std::string strError = "Unknown";
+    if (!m_OpenSlideWrapper->GetDimensions(i64Width, i64Height))
+    {
+      std::string        strError = "Unknown";
       const char * const p_cError = m_OpenSlideWrapper->GetError();
 
-      if (p_cError != NULL) {
+      if (p_cError != NULL)
+      {
         strError = p_cError;
         m_OpenSlideWrapper->Close(); // Can only safely close this now
       }
 
-      itkExceptionMacro( "Error OpenSlideImageIO could not read dimensions: "
-                         << this->GetFileName()
-                         << std::endl
-                         << "Reason: " << strError );
+      itkExceptionMacro("Error OpenSlideImageIO could not read dimensions: " << this->GetFileName() << std::endl
+                                                                             << "Reason: " << strError);
     }
 
     // i64Width and i64Height are known to be positive
-    if ((uint64_t)i64Width > std::numeric_limits<SizeValueType>::max() || (uint64_t)i64Height > std::numeric_limits<SizeValueType>::max()) {
-      itkExceptionMacro( "Error OpenSlideImageIO image dimensions are too large for SizeValueType: "
-                         << this->GetFileName()
-                         << std::endl
-                         << "Reason: " 
-                         << i64Width << " > " << std::numeric_limits<SizeValueType>::max() 
-                         << " or " << i64Height << " > " << std::numeric_limits<SizeValueType>::max() );
+    if ((uint64_t)i64Width > std::numeric_limits<SizeValueType>::max() ||
+        (uint64_t)i64Height > std::numeric_limits<SizeValueType>::max())
+    {
+      itkExceptionMacro("Error OpenSlideImageIO image dimensions are too large for SizeValueType: "
+                        << this->GetFileName() << std::endl
+                        << "Reason: " << i64Width << " > " << std::numeric_limits<SizeValueType>::max() << " or "
+                        << i64Height << " > " << std::numeric_limits<SizeValueType>::max());
     }
 
     m_Dimensions[0] = (SizeValueType)i64Width;
@@ -634,42 +714,42 @@ void OpenSlideImageIO::ReadImageInformation() {
 }
 
 
-void OpenSlideImageIO::Read( void * buffer)
+void
+OpenSlideImageIO::Read(void * buffer)
 {
   uint32_t * const p_u32Buffer = (uint32_t *)buffer;
 
-  if (m_OpenSlideWrapper == NULL || !m_OpenSlideWrapper->IsOpened()) {
-    itkExceptionMacro( "Error OpenSlideImageIO could not read region: "
-                       << this->GetFileName()
-                       << std::endl
-                       << "Reason: OpenSlide context is not opened." );
+  if (m_OpenSlideWrapper == NULL || !m_OpenSlideWrapper->IsOpened())
+  {
+    itkExceptionMacro("Error OpenSlideImageIO could not read region: " << this->GetFileName() << std::endl
+                                                                       << "Reason: OpenSlide context is not opened.");
   }
 
-  const ImageIORegion clRegionToRead = this->GetIORegion();
-  const ImageIORegion::SizeType clSize = clRegionToRead.GetSize();
+  const ImageIORegion            clRegionToRead = this->GetIORegion();
+  const ImageIORegion::SizeType  clSize = clRegionToRead.GetSize();
   const ImageIORegion::IndexType clStart = clRegionToRead.GetIndex();
 
-  if ( ((uint64_t)clSize[0])*((uint64_t)clSize[1]) > std::numeric_limits<ImageIORegion::SizeValueType>::max() ) {
-    itkExceptionMacro( "Error OpenSlideImageIO could not read region: "
-                       << this->GetFileName()
-                       << std::endl
-                       << "Reason: Requested region size in pixels overflows." );
+  if (((uint64_t)clSize[0]) * ((uint64_t)clSize[1]) > std::numeric_limits<ImageIORegion::SizeValueType>::max())
+  {
+    itkExceptionMacro("Error OpenSlideImageIO could not read region: "
+                      << this->GetFileName() << std::endl
+                      << "Reason: Requested region size in pixels overflows.");
   }
 
-  const char *p_cError = m_OpenSlideWrapper->ReadRegion(p_u32Buffer, clStart[0], clStart[1], clSize[0], clSize[1]);
+  const char * p_cError = m_OpenSlideWrapper->ReadRegion(p_u32Buffer, clStart[0], clStart[1], clSize[0], clSize[1]);
 
-  if (p_cError != NULL) {
+  if (p_cError != NULL)
+  {
     std::string strError = p_cError; // Copy this since Close() may destroy the backing buffer
-    m_OpenSlideWrapper->Close(); // Can only safely close this now
-    itkExceptionMacro( "Error OpenSlideImageIO could not read region: "
-                       << this->GetFileName()
-                       << std::endl
-                       << "Reason: " << strError );
+    m_OpenSlideWrapper->Close();     // Can only safely close this now
+    itkExceptionMacro("Error OpenSlideImageIO could not read region: " << this->GetFileName() << std::endl
+                                                                       << "Reason: " << strError);
   }
 
   // Re-order the bytes (ARGB -> RGBA)
   const int64_t i64TotalSize = clRegionToRead.GetNumberOfPixels();
-  for (int64_t i = 0; i < i64TotalSize; ++i) {
+  for (int64_t i = 0; i < i64TotalSize; ++i)
+  {
     // XXX: Endianness?
     RGBAPixel<unsigned char> clPixel;
     clPixel.SetRed((p_u32Buffer[i] >> 16) & 0xff);
@@ -681,14 +761,15 @@ void OpenSlideImageIO::Read( void * buffer)
   }
 }
 
-bool OpenSlideImageIO::CanWriteFile( const char * /*name*/ )
+bool
+OpenSlideImageIO::CanWriteFile(const char * /*name*/)
 {
   return false;
 }
 
 void
-OpenSlideImageIO
-::WriteImageInformation(void) {
+OpenSlideImageIO ::WriteImageInformation(void)
+{
   // add writing here
 }
 
@@ -697,19 +778,20 @@ OpenSlideImageIO
  *
  */
 void
-OpenSlideImageIO::Write( const void* /*buffer*/) {
-}
+OpenSlideImageIO::Write(const void * /*buffer*/)
+{}
 
 /** Given a requested region, determine what could be the region that we can
  * read from the file. This is called the streamable region, which will be
  * smaller than the LargestPossibleRegion and greater or equal to the
 RequestedRegion */
 ImageIORegion
-OpenSlideImageIO::GenerateStreamableReadRegionFromRequestedRegion( const ImageIORegion & requested ) const {
+OpenSlideImageIO::GenerateStreamableReadRegionFromRequestedRegion(const ImageIORegion & requested) const
+{
   if (m_OpenSlideWrapper == NULL)
     return requested;
 
-  ImageIORegion::SizeType clSize = requested.GetSize();
+  ImageIORegion::SizeType  clSize = requested.GetSize();
   ImageIORegion::IndexType clStart = requested.GetIndex();
 
   int64_t i64X = clStart[0];
@@ -736,21 +818,27 @@ OpenSlideImageIO::GenerateStreamableReadRegionFromRequestedRegion( const ImageIO
 }
 
 /** Get underlying OpenSlide library version */
-std::string OpenSlideImageIO::GetOpenSlideVersion() const {
+std::string
+OpenSlideImageIO::GetOpenSlideVersion() const
+{
   const char * const p_cVersion = OpenSlideWrapper::GetVersion();
   return p_cVersion != NULL ? std::string(p_cVersion) : std::string();
 }
 
 /** Detect the vendor of the current file. */
-std::string OpenSlideImageIO::GetVendor() const {
+std::string
+OpenSlideImageIO::GetVendor() const
+{
   const char * const p_cVendor = OpenSlideWrapper::DetectVendor(this->GetFileName());
   return p_cVendor != NULL ? std::string(p_cVendor) : std::string();
 }
 
 /** Sets the level to read. Level 0 (default) is the highest resolution level.
- * This method overrides any previously selected associated image. 
+ * This method overrides any previously selected associated image.
  * Call ReadImageInformation() again after calling this function. */
-void OpenSlideImageIO::SetLevel(int iLevel) {
+void
+OpenSlideImageIO::SetLevel(int iLevel)
+{
   if (m_OpenSlideWrapper == NULL)
     return;
 
@@ -758,7 +846,9 @@ void OpenSlideImageIO::SetLevel(int iLevel) {
 }
 
 /** Returns the currently selected level. */
-int OpenSlideImageIO::GetLevel() const {
+int
+OpenSlideImageIO::GetLevel() const
+{
   if (m_OpenSlideWrapper == NULL)
     return -1;
 
@@ -766,7 +856,9 @@ int OpenSlideImageIO::GetLevel() const {
 }
 
 /** Returns the number of available levels. */
-int OpenSlideImageIO::GetLevelCount() const {
+int
+OpenSlideImageIO::GetLevelCount() const
+{
   if (m_OpenSlideWrapper == NULL)
     return -1;
 
@@ -776,7 +868,9 @@ int OpenSlideImageIO::GetLevelCount() const {
 /** Sets the associated image to extract.
  * This method overrides any previously selected level.
  * Call ReadImageInformation() again after calling this function. */
-void OpenSlideImageIO::SetAssociatedImageName(const std::string &strName) {
+void
+OpenSlideImageIO::SetAssociatedImageName(const std::string & strName)
+{
   if (m_OpenSlideWrapper == NULL)
     return;
 
@@ -784,7 +878,9 @@ void OpenSlideImageIO::SetAssociatedImageName(const std::string &strName) {
 }
 
 /** Returns the currently selected associated image name (empty string if none). */
-std::string OpenSlideImageIO::GetAssociatedImageName() const {
+std::string
+OpenSlideImageIO::GetAssociatedImageName() const
+{
   if (m_OpenSlideWrapper == NULL)
     return std::string();
 
@@ -792,9 +888,11 @@ std::string OpenSlideImageIO::GetAssociatedImageName() const {
 }
 
 /** Sets the best level to read for the given downsample factor.
- * This method overrides any previously selected associated image. 
+ * This method overrides any previously selected associated image.
  * Call ReadImageInformation() again after calling this function. */
-bool OpenSlideImageIO::SetLevelForDownsampleFactor(double dDownsampleFactor) {
+bool
+OpenSlideImageIO::SetLevelForDownsampleFactor(double dDownsampleFactor)
+{
   if (m_OpenSlideWrapper == NULL)
     return false;
 
@@ -802,7 +900,9 @@ bool OpenSlideImageIO::SetLevelForDownsampleFactor(double dDownsampleFactor) {
 }
 
 /** Returns all associated image names stored in the file. */
-OpenSlideImageIO::AssociatedImageNameContainer OpenSlideImageIO::GetAssociatedImageNames() const {
+OpenSlideImageIO::AssociatedImageNameContainer
+OpenSlideImageIO::GetAssociatedImageNames() const
+{
   if (m_OpenSlideWrapper == NULL)
     return AssociatedImageNameContainer();
 
@@ -810,7 +910,9 @@ OpenSlideImageIO::AssociatedImageNameContainer OpenSlideImageIO::GetAssociatedIm
 }
 
 /** Returns the absolute maximum number of streamable regions (tiles). */
-int64_t OpenSlideImageIO::ComputeMaximumNumberOfStreamableRegions() const {
+int64_t
+OpenSlideImageIO::ComputeMaximumNumberOfStreamableRegions() const
+{
   if (m_OpenSlideWrapper == NULL)
     return -1;
 
@@ -818,12 +920,14 @@ int64_t OpenSlideImageIO::ComputeMaximumNumberOfStreamableRegions() const {
 }
 
 /** Returns the maximum number of streamable regions similar (but >=) to the given region. */
-int64_t OpenSlideImageIO::ComputeMaximumNumberOfStreamableRegions(const ImageIORegion &clRegion) const {
+int64_t
+OpenSlideImageIO::ComputeMaximumNumberOfStreamableRegions(const ImageIORegion & clRegion) const
+{
   if (m_OpenSlideWrapper == NULL)
     return -1;
 
   ImageIORegion::IndexType clStart = clRegion.GetIndex();
-  ImageIORegion::SizeType clSize = clRegion.GetSize();
+  ImageIORegion::SizeType  clSize = clRegion.GetSize();
 
   if (clStart.size() != 2 || clSize.size() != 2)
     return -1;
@@ -832,12 +936,14 @@ int64_t OpenSlideImageIO::ComputeMaximumNumberOfStreamableRegions(const ImageIOR
 }
 
 /** Returns the minimum streamable region. */
-ImageIORegion OpenSlideImageIO::GetMinimumStreamableRegion() const {
+ImageIORegion
+OpenSlideImageIO::GetMinimumStreamableRegion() const
+{
   if (m_OpenSlideWrapper == NULL)
     return ImageIORegion();
 
-  ImageIORegion clRegion;
-  ImageIORegion::SizeType clSize(2);
+  ImageIORegion            clRegion;
+  ImageIORegion::SizeType  clSize(2);
   ImageIORegion::IndexType clIndex(2, 0);
 
   int64_t i64Width = 0, i64Height = 0;
@@ -855,13 +961,17 @@ ImageIORegion OpenSlideImageIO::GetMinimumStreamableRegion() const {
 }
 
 /** Turn on/off approximate streaming. This only affects streaming level images other than level 0. */
-void OpenSlideImageIO::SetApproximateStreaming(bool bApproximateStreaming) {
+void
+OpenSlideImageIO::SetApproximateStreaming(bool bApproximateStreaming)
+{
   if (m_OpenSlideWrapper != NULL)
     m_OpenSlideWrapper->SetApproximateStreaming(bApproximateStreaming);
 }
 
 /** Returns weather approximate streaming is enabled or not. */
-bool OpenSlideImageIO::GetApproximateStreaming() const {
+bool
+OpenSlideImageIO::GetApproximateStreaming() const
+{
   return m_OpenSlideWrapper != NULL && m_OpenSlideWrapper->GetApproximateStreaming();
 }
 
