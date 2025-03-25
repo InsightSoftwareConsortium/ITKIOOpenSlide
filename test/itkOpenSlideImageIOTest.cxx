@@ -27,13 +27,11 @@
 #include "itkImageFileWriter.h"
 #include "itkImage.h"
 #include "itkRGBAPixel.h"
-#include "itkOpenSlideImageIO.h"
 
 #define SPECIFIC_IMAGEIO_MODULE_TEST
 
 namespace
 {
-
 bool
 ParseValue(const char * p_cValue, std::string & strCommand, std::string & strValue)
 {
@@ -60,36 +58,6 @@ ParseValue(const char * p_cValue, std::string & strCommand, std::string & strVal
 
   return true;
 }
-
-#if 0
-// For generating data for tests (particularly the streaming one)
-bool CompressImageFile(const char *p_cFileName) {
-  using PixelType = itk::RGBAPixel<unsigned char>;
-  using ImageType = itk::Image<PixelType, 2>;
-
-  using ReaderType = itk::ImageFileReader<ImageType>;
-  using WriterType = itk::ImageFileWriter<ImageType>;
-
-  ReaderType::Pointer p_clReader = ReaderType::New();
-  WriterType::Pointer p_clWriter = WriterType::New();
-
-  p_clReader->SetFileName(p_cFileName);
-  p_clWriter->SetInput(p_clReader->GetOutput());
-  p_clWriter->SetFileName(p_cFileName);
-  p_clWriter->UseCompressionOn();
-
-  try {
-    p_clWriter->Update();
-  }
-  catch (itk::ExceptionObject &e) {
-    std::cerr << "Error: " << e << std::endl;
-    return false;
-  }
-
-  return true;
-}
-#endif
-
 } // End anonymous namespace
 
 int
@@ -111,6 +79,7 @@ itkOpenSlideImageIOTest(int argc, char * argv[])
   const char * const p_cInputImage = argv[1];
   const char * const p_cOutputImage = argv[2];
 
+  // skip program name, input file name, and output file name
   argc -= 3;
   argv += 3;
 
@@ -291,9 +260,6 @@ itkOpenSlideImageIOTest(int argc, char * argv[])
     std::cerr << "Error: " << e << std::endl;
     return iFailCode;
   }
-
-  // Use this to compress output images when updating tests
-  // CompressImageFile(p_cOutputImage);
 
   return iSuccessCode;
 }
