@@ -51,7 +51,7 @@ ReadFileStripCR(const char * p_cFileName, std::vector<char> & vBuffer)
 {
   vBuffer.clear();
 
-  std::ifstream fileStream(p_cFileName);
+  std::ifstream fileStream(p_cFileName, std::ios::binary);
   if (!fileStream)
     return false;
 
