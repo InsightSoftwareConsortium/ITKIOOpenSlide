@@ -1,0 +1,84 @@
+
+Image Information:
+
+Dimensions: 2
+Component type: unsigned_char
+Pixel type: rgba
+Vendor: aperio
+
+Meta Data:
+
+Number of keys: 51
+Entries:
+aperio.AppMag = 20
+aperio.Date = 12/29/09
+aperio.Filename = CMU-1
+aperio.Filtered = 5
+aperio.Focus Offset = 0.000000
+aperio.ICC Profile = ScanScope v1
+aperio.ImageID = 1004486
+aperio.Left = 25.691574
+aperio.LineAreaXOffset = 0.019265
+aperio.LineAreaYOffset = -0.000313
+aperio.LineCameraSkew = -0.000424
+aperio.MPP = 0.4990
+aperio.OriginalWidth = 46920
+aperio.Originalheight = 33014
+aperio.Parmset = USM Filter
+aperio.ScanScope ID = CPAPERIOCS
+aperio.StripeWidth = 2040
+aperio.Time = 09:59:15
+aperio.Top = 23.449873
+aperio.User = b414003d-95c6-48b0-9369-8010ed517ba7
+openslide.associated.label.height = 463
+openslide.associated.label.width = 387
+openslide.associated.macro.height = 431
+openslide.associated.macro.width = 1280
+openslide.associated.thumbnail.height = 732
+openslide.associated.thumbnail.width = 1024
+openslide.comment = Aperio Image Library v10.0.51
+46920x33014 [0,100 46000x32914] (256x256) JPEG/RGB Q=30|AppMag = 20|StripeWidth = 2040|ScanScope ID = CPAPERIOCS|Filename = CMU-1|Date = 12/29/09|Time = 09:59:15|User = b414003d-95c6-48b0-9369-8010ed517ba7|Parmset = USM Filter|MPP = 0.4990|Left = 25.691574|Top = 23.449873|LineCameraSkew = -0.000424|LineAreaXOffset = 0.019265|LineAreaYOffset = -0.000313|Focus Offset = 0.000000|ImageID = 1004486|OriginalWidth = 46920|Originalheight = 33014|Filtered = 5|ICC Profile = ScanScope v1
+openslide.icc-size = 141992
+openslide.level-count = 3
+openslide.level[0].downsample = 1
+openslide.level[0].height = 32914
+openslide.level[0].tile-height = 256
+openslide.level[0].tile-width = 256
+openslide.level[0].width = 46000
+openslide.level[1].downsample = 4.0001215362177929
+openslide.level[1].height = 8228
+openslide.level[1].tile-height = 256
+openslide.level[1].tile-width = 256
+openslide.level[1].width = 11500
+openslide.level[2].downsample = 16.000486144871171
+openslide.level[2].height = 2057
+openslide.level[2].tile-height = 256
+openslide.level[2].tile-width = 256
+openslide.level[2].width = 2875
+openslide.mpp-x = 0.499
+openslide.mpp-y = 0.499
+openslide.objective-power = 20
+openslide.quickhash-1 = 30f1a38031fc0e21d81f9d01435ac4af848f6fe2bbf8f7768184336ee5d7e796
+openslide.vendor = aperio
+tiff.ImageDescription = Aperio Image Library v10.0.51
+46920x33014 [0,100 46000x32914] (256x256) JPEG/RGB Q=30|AppMag = 20|StripeWidth = 2040|ScanScope ID = CPAPERIOCS|Filename = CMU-1|Date = 12/29/09|Time = 09:59:15|User = b414003d-95c6-48b0-9369-8010ed517ba7|Parmset = USM Filter|MPP = 0.4990|Left = 25.691574|Top = 23.449873|LineCameraSkew = -0.000424|LineAreaXOffset = 0.019265|LineAreaYOffset = -0.000313|Focus Offset = 0.000000|ImageID = 1004486|OriginalWidth = 46920|Originalheight = 33014|Filtered = 5|ICC Profile = ScanScope v1
+tiff.ResolutionUnit = inch
+
+Level Information:
+
+Level count: 3
+Levels:
+Level 0: dimensions = [46000, 32914], spacing = [0.499, 0.499], size in bytes = 6056176000
+Level 1: dimensions = [11500, 8228], spacing = [1.99606, 1.99606], size in bytes = 378488000
+Level 2: dimensions = [2875, 2057], spacing = [7.98424, 7.98424], size in bytes = 23655500
+
+Associated image information:
+
+Number of associated images: 3
+Associated image names:
+'label', 'macro', 'thumbnail'
+
+Associated images:
+label: dimensions = [387, 463], spacing = [1, 1], size in bytes = 716724
+macro: dimensions = [1280, 431], spacing = [1, 1], size in bytes = 2206720
+thumbnail: dimensions = [1024, 732], spacing = [1, 1], size in bytes = 2998272
