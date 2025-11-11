@@ -44,22 +44,29 @@ public:
   using ConstPointer = SmartPointer<const Self>;
 
   /** Class methods used to interface with the registered factories. */
-  virtual const char* GetITKSourceVersion() const;
-  virtual const char* GetDescription() const;
+  virtual const char *
+  GetITKSourceVersion() const;
+  virtual const char *
+  GetDescription() const;
 
   /** Method for class instantiation. */
   itkFactorylessNewMacro(Self);
-  static OpenSlideImageIOFactory* FactoryNew() { return new OpenSlideImageIOFactory;}
+  static OpenSlideImageIOFactory *
+  FactoryNew()
+  {
+    return new OpenSlideImageIOFactory;
+  }
 
   /** Run-time type information (and related methods). */
   itkOverrideGetNameOfClassMacro(OpenSlideImageIOFactory);
 
   /** Register one factory of this type  */
-  static void RegisterOneFactory()
-    {
+  static void
+  RegisterOneFactory()
+  {
     OpenSlideImageIOFactory::Pointer metaFactory = OpenSlideImageIOFactory::New();
     ObjectFactoryBase::RegisterFactory(metaFactory);
-    }
+  }
 
 protected:
   OpenSlideImageIOFactory();
