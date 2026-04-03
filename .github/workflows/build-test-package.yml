@@ -12,9 +12,13 @@ on:
 
 jobs:
   cxx-build-workflow:
-    uses: InsightSoftwareConsortium/ITKRemoteModuleBuildTestPackageAction/.github/workflows/build-test-cxx.yml@v5.4.2
+    uses: InsightSoftwareConsortium/ITKRemoteModuleBuildTestPackageAction/.github/workflows/build-test-cxx.yml@add-apt-packages-input
+    with:
+      apt-packages: 'libopenslide-dev'
+      brew-packages: 'openslide'
+      os-list: '["ubuntu-22.04", "macos-15-intel", "macos-15"]'
 
   python-build-workflow:
-    uses: InsightSoftwareConsortium/ITKRemoteModuleBuildTestPackageAction/.github/workflows/build-test-package-python.yml@v5.4.2
+    uses: InsightSoftwareConsortium/ITKRemoteModuleBuildTestPackageAction/.github/workflows/build-test-package-python.yml@v5.4.6
     secrets:
       pypi_password: ${{ secrets.pypi_password }}
