@@ -19,7 +19,6 @@
 #include "itkCreateObjectFunction.h"
 #include "itkOpenSlideImageIO.h"
 #include "itkVersion.h"
-#include "IOOpenSlideExport.h"
 
 namespace itk
 {

@@ -3,9 +3,10 @@ set(IOOpenSlide_SRCS
   itkOpenSlideImageIO.cxx
   )
 
-include_directories(${OPENSLIDE_INCLUDE_DIRS})
-
 add_library(IOOpenSlide ${IOOpenSlide_SRCS})
-target_link_libraries(IOOpenSlide LINK_PRIVATE ${OPENSLIDE_LIBRARIES})
+target_include_directories(IOOpenSlide PRIVATE ${OPENSLIDE_INCLUDE_DIRS})
+target_include_directories(IOOpenSlide PRIVATE ${CMAKE_CURRENT_LIST_DIR}/../include)
+target_include_directories(IOOpenSlide PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/include)
+target_link_libraries(IOOpenSlide PRIVATE ${OPENSLIDE_LIBRARIES})
 itk_module_link_dependencies()
 itk_module_target(IOOpenSlide)
