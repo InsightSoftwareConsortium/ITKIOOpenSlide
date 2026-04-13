@@ -3,6 +3,7 @@ set(IOOpenSlide_SRCS
   itkOpenSlideImageIO.cxx
   )
 
+include_directories("${IOOpenSlide_SOURCE_DIR}/include")
 include_directories(${OPENSLIDE_INCLUDE_DIRS})
 
 add_library(IOOpenSlide ${IOOpenSlide_SRCS})
