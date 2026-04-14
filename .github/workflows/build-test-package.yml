@@ -18,7 +18,8 @@ jobs:
       brew-packages: 'openslide'
       os-list: '["ubuntu-22.04", "macos-15-intel", "macos-15"]'
 
-  python-build-workflow:
-    uses: InsightSoftwareConsortium/ITKRemoteModuleBuildTestPackageAction/.github/workflows/build-test-package-python.yml@v5.4.6
-    secrets:
-      pypi_password: ${{ secrets.pypi_password }}
+  # Python wheel builds are disabled because OpenSlide is an external C
+  # library that is not available in the manylinux Docker containers or
+  # the Windows wheel-build environment.  Re-enable when the Python
+  # workflow gains apt-packages / brew-packages support or the module
+  # bundles its own OpenSlide build.
