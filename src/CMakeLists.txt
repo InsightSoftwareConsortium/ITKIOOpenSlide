@@ -4,6 +4,7 @@ set(IOOpenSlide_SRCS
   )
 
 include_directories("${IOOpenSlide_SOURCE_DIR}/include")
+include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 include_directories(${OPENSLIDE_INCLUDE_DIRS})
 
 add_library(IOOpenSlide ${IOOpenSlide_SRCS})
