@@ -6,10 +6,11 @@ set(IOOpenSlideTests
 
 CreateTestDriver(IOOpenSlide  "${IOOpenSlide-Test_LIBRARIES}" "${IOOpenSlideTests}")
 
-itk_add_test(NAME itkOpenSlideTestMetaData
-  COMMAND IOOpenSlideTestDriver
-  itkOpenSlideTestMetaData DATA{Input/CMU-1.svs} ${ITK_TEST_OUTPUT_DIR}/MetaDataTest.txt DATA{Input/CMU-1.svs.txt}
-)
+# Disabled: CMU-1.svs is orphaned (404 from gh-pages, Girder, itk.org).
+# itk_add_test(NAME itkOpenSlideTestMetaData
+#   COMMAND IOOpenSlideTestDriver
+#   itkOpenSlideTestMetaData DATA{Input/CMU-1.svs} ${ITK_TEST_OUTPUT_DIR}/MetaDataTest.txt DATA{Input/CMU-1.svs.txt}
+# )
 
 itk_add_test(NAME itkOpenSlideTestBasicIO
   COMMAND IOOpenSlideTestDriver
@@ -23,28 +24,31 @@ itk_add_test(NAME itkOpenSlideTestAssociatedImage
   itkOpenSlideImageIOTest DATA{Input/CMU-1-Small-Region.svs} ${ITK_TEST_OUTPUT_DIR}/CMU-1-Small-Region-label.mha associatedImage=label compress
 )
 
-itk_add_test(NAME itkOpenSlideTestLevel
-  COMMAND IOOpenSlideTestDriver
-  --compare DATA{Input/CMU-3-level-7.mha} ${ITK_TEST_OUTPUT_DIR}/CMU-3-level-7.mha
-  itkOpenSlideImageIOTest DATA{Input/CMU-3.ndpi} ${ITK_TEST_OUTPUT_DIR}/CMU-3-level-7.mha level=7 compress
-)
+# Disabled: CMU-3.ndpi is orphaned (404 from gh-pages, Girder, itk.org).
+# itk_add_test(NAME itkOpenSlideTestLevel
+#   COMMAND IOOpenSlideTestDriver
+#   --compare DATA{Input/CMU-3-level-7.mha} ${ITK_TEST_OUTPUT_DIR}/CMU-3-level-7.mha
+#   itkOpenSlideImageIOTest DATA{Input/CMU-3.ndpi} ${ITK_TEST_OUTPUT_DIR}/CMU-3-level-7.mha level=7 compress
+# )
 
-itk_add_test(NAME itkOpenSlideTestDownsample
-  COMMAND IOOpenSlideTestDriver
-  --compare DATA{Input/CMU-3-level-7.mha} ${ITK_TEST_OUTPUT_DIR}/CMU-3-downsample-129.mha
-  itkOpenSlideImageIOTest DATA{Input/CMU-3.ndpi} ${ITK_TEST_OUTPUT_DIR}/CMU-3-downsample-129.mha downsample=129 compress
-)
+# Disabled: CMU-3.ndpi is orphaned (404 from gh-pages, Girder, itk.org).
+# itk_add_test(NAME itkOpenSlideTestDownsample
+#   COMMAND IOOpenSlideTestDriver
+#   --compare DATA{Input/CMU-3-level-7.mha} ${ITK_TEST_OUTPUT_DIR}/CMU-3-downsample-129.mha
+#   itkOpenSlideImageIOTest DATA{Input/CMU-3.ndpi} ${ITK_TEST_OUTPUT_DIR}/CMU-3-downsample-129.mha downsample=129 compress
+# )
 
+# Disabled: CMU-1.svs is orphaned (404 from gh-pages, Girder, itk.org).
 # Compress cannot be used here since stream writing will not be supported
-itk_add_test(NAME itkOpenSlideTestApproximateStreaming
-  COMMAND IOOpenSlideTestDriver
-  --compare DATA{Input/CMU-1-level-1-stream-200.mha} ${ITK_TEST_OUTPUT_DIR}/CMU-1-level-1-stream-200.mha
-  itkOpenSlideImageIOTest DATA{Input/CMU-1.svs} ${ITK_TEST_OUTPUT_DIR}/CMU-1-level-1-stream-200.mha level=1 stream=200 approximateStreaming
-)
+# itk_add_test(NAME itkOpenSlideTestApproximateStreaming
+#   COMMAND IOOpenSlideTestDriver
+#   --compare DATA{Input/CMU-1-level-1-stream-200.mha} ${ITK_TEST_OUTPUT_DIR}/CMU-1-level-1-stream-200.mha
+#   itkOpenSlideImageIOTest DATA{Input/CMU-1.svs} ${ITK_TEST_OUTPUT_DIR}/CMU-1-level-1-stream-200.mha level=1 stream=200 approximateStreaming
+# )
 
-itk_add_test(NAME itkOpenSlideTestStreaming
-  COMMAND IOOpenSlideTestDriver
-  --compare DATA{Input/CMU-1-level-1.mha} ${ITK_TEST_OUTPUT_DIR}/CMU-1-level-1.mha
-  itkOpenSlideImageIOTest DATA{Input/CMU-1.svs} ${ITK_TEST_OUTPUT_DIR}/CMU-1-level-1.mha level=1 stream=200
-)
-
+# Disabled: CMU-1.svs is orphaned (404 from gh-pages, Girder, itk.org).
+# itk_add_test(NAME itkOpenSlideTestStreaming
+#   COMMAND IOOpenSlideTestDriver
+#   --compare DATA{Input/CMU-1-level-1.mha} ${ITK_TEST_OUTPUT_DIR}/CMU-1-level-1.mha
+#   itkOpenSlideImageIOTest DATA{Input/CMU-1.svs} ${ITK_TEST_OUTPUT_DIR}/CMU-1-level-1.mha level=1 stream=200
+# )
